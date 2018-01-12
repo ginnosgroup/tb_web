@@ -6,6 +6,7 @@
 		gmt_create,
 		gmt_modify,
 		name,
+		birthday,
 		phone,
 		email,
 		auth_type,
@@ -20,6 +21,7 @@
 		now(),
 		now(),
 		"",
+		null,
 		"",
 		"",
 		#{thirdType},
@@ -36,6 +38,7 @@
 		select
 		id,
 		name,
+		birthday,
 		phone,
 		email,
 		auth_type as authType,
@@ -80,6 +83,7 @@
 		select
 		id,
 		name,
+		birthday,
 		phone,
 		email,
 		auth_type as authType,
@@ -101,6 +105,7 @@
 		select
 		id,
 		name,
+		birthday,
 		phone,
 		email,
 		auth_type as authType,

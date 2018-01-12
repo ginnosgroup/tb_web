@@ -12,6 +12,8 @@ public class UserDTO {
     private int id;
 
     private String name;
+    
+    private Date birthday;
 
     private String phone;
 

@@ -10,6 +10,8 @@ public class UserDO {
     private int id;
 
     private String name;
+    
+    private Date birthday;
 
     private String phone;
 
