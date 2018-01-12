@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-我的顾问</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>我的顾问</h3>
+	</div>
+	<div class="adviser" v-if="userMsg.adviserDto">
+		<div class="adviser-info">
+			<img :src="userMsg.adviserDto.imageUrl" alt="">
+			<p>{{userMsg.adviserDto.name}}</p>
+		</div>
+		<div class="qr-tips">长按图片扫码，即刻对话</div>
+	</div>
+	<div v-else class="no-adviser">还没有顾问</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+
+</div>	
+
+
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		console.log(userInfo);
+		var v = new Vue({
+			el:"#app",
+			data:{
+				userMsg:userInfo,
+				isShowKefu:false
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				}
+			}
+		})
+	</script>
+</body>
+</html>

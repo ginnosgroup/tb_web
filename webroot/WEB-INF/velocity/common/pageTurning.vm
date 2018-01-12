@@ -1,0 +1,18 @@
+<div class="page">
+  <a href="$homeUrl?page=1#if($cId)&cId=$cId#end">首页</a>
+  <a href="$homeUrl?page=$frontPage#if($cId)&cId=$cId#end">上一页</a>
+  #foreach($p in [1 .. $pageTotleNum])
+    #set($x = $pageNo - $pageXYNum)
+    #set($y = $pageNo + $pageXYNum)
+    #if($p > $x && $p < $y)
+      #if($pageNo == $p)
+        <span class="pageOn">$p</span>&nbsp;
+      #else
+        <a href="$homeUrl?page=$p#if($cId)&cId=$cId#end">$p</a>&nbsp;
+      #end
+    #end
+  #end
+  <a href="$homeUrl?page=$nextPage#if($cId)&cId=$cId#end">下一页</a>
+  <a href="$homeUrl?page=$pageTotleNum#if($cId)&cId=$cId#end">尾页</a>&nbsp;&nbsp;
+  <span>共 <b>${pageTotleNum}</b> 页&nbsp;&nbsp;</span>
+</div>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>FLY Info</title>
+        <style>
+        
+            body{
+                background: #fff;
+                color: #333;
+            }
+            
+            a, a:visited, a:link, a:active{
+                color: #333;
+            }
+            
+            a:hover{
+                color: #00f;
+            }
+        
+            .charts_container{
+                overflow: auto;
+                width: 900px;
+                height: 420px;
+                margin: 10px auto;
+            }
+            
+            .chart_container_centered{
+                text-align: center;
+                width: 900px;
+                height: 420px;
+                margin: 10px auto;
+            }
+            
+            .chart_container{
+                width: 400px;
+                height: 400px;
+                margin: 0px 25px;
+                float: left;
+            }
+            
+            .footer{
+                font-size: small;
+                text-align: right;
+            }
+        </style>
+        <script type="application/javascript" src="awesomechart.js"> </script>
+    </head>
+    <body>
+        <div class="charts_container">
+            <div class="chart_container">
+                
+                <canvas id="chartCanvas1" width="400" height="400">
+                    Your web-browser does not support the HTML 5 canvas element.
+                </canvas>
+                <b>

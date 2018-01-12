@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-订单正在处理</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+	<div class="pay-header">
+		<!-- <span @click="goBack"><i class="iconfont">&#xe679;</i></span> -->
+		<h3>订单正在处理</h3>
+	</div>
+	<div class="success">
+		<div class="succ-icon fail-icon"><i class="iconfont">&#xe65f;</i></div>
+		<div class="succ-text">订单正在处理</div>
+		<div class="go-detail fail-detail" @click="orderDetail">查看订单</div>
+		<div class="qr-code">
+			<img src="img/kefu.jpg" alt="">
+			<p>联系客服随时为您服务</p>
+		</div>
+	</div>
+
+	<div class="contact-us">
+		<div class="contact-title">联系我们</div>
+		<div class="contact-detail">
+			<div>
+				指南针悉尼：  +61(02)9267 7001 <br>
+				地址：Unit 201, 630 George Street, Sydney NSW 2000
+			</div>
+			<div>
+				指南针墨尔本: +61(03)9670 3779 <br>
+				地址：Level 3, 380 Bourke St, Melbourne VIC 3000
+			</div>
+			<div>
+				指南针堪培拉: +61(02)6169 4130 <br>
+				地址：Room 526, Tower A, Level 5, 7 London Circuit,Canberra ACT 2601
+			</div>
+			<div>
+				指南针阿德莱德: +61(08)8410 4180 <br>
+				地址：Suite 1104-1109, 118 King William St,Adelaide SA 5000
+			</div>
+			<div>
+				指南针布里斯班: +61(07)3003 0514 <br>
+				地址：Level 2, 150 Edward St, Brisbane QLD 4000
+			</div>
+			<div>
+				指南针中国总部：+86(010)8288 7260 <br>
+				地址：北京市海淀区中关村大街19号新中关大厦B座南翼1207室
+			</div>
+		</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+	
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var orderId = sessionStorage.getItem("orderId");
+		var v = new Vue({
+			el:"#app",
+			data:{
+				orderId:orderId
+			},
+			methods:{
+				// goBack:function(){
+				// 	history.back();
+				// },
+				orderDetail:function(){
+					location.href="order-detail.htm?id="+this.orderId;
+				}
+			}
+		})
+	</script>
+</body>
+</html>

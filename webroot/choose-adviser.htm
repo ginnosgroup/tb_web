@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-选择顾问</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+	<div class="city-header">
+		<h3>选择顾问({{cityName}}) <b v-if="!isShareIn" @click="gotoCity">切换区域</b></h3>
+	</div>
+
+	<div class="city-main">
+		<div class="city-item">
+			<div class="city-title">我已有顾问</div>
+			<ul class="city-choice clearfix">
+				<li v-for="item in adviser" @click="choiceAdviser(item.id)" :class="[item.id==ckId ? 'active':'']">{{item.name}}</li>
+			</ul>
+		</div>
+		<div class="city-item">
+			<div class="city-title">我暂无顾问</div>
+			<ul class="city-choice clearfix">
+				<li  @click="choiceAdviser(0)" :class="[noId==ckId ? 'active':'']">自动分配</li>
+			</ul>
+		</div>
+	</div>
+
+	<div v-if="isOk" class="city-footer" @click="confirmAdviser">确定</div>
+	<div v-else class="city-footer">顾问绑定中...</div>
+
+	<div class="auto-adviser" v-if="showAdviser">
+		<div class="step02">
+			<div class="step02-title">恭喜您领取成功！</div>
+			<div class="step02-tips">我是您的顾问{{userMsg.adviserDto.name}}，<br>对于课程有疑问可随时找我哦！</div>
+			<div class="step02-qrcode">
+				<img :src="userMsg.adviserDto.imageUrl" alt="">
+				<p>长按识别二维码 即时对话</p>
+			</div>
+			<div class="go-scan" @click="scan">浏览课程</div>
+		</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小		
+		var cid = sessionStorage.getItem('cityID');
+		var cityName = sessionStorage.getItem('ckName');
+		var openId = sessionStorage.getItem("openId");
+		var shareIn = sessionStorage.getItem("shareIn");
+		var userInfo = '';
+		if(sessionStorage.getItem("userInfo")){
+			userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		}
+		var v = new Vue({
+			el:'#app',
+			data:{
+				userMsg:userInfo,
+				cityID:cid,
+				cityName:cityName,
+				openId:openId,
+				adviser:null,
+				ckId:9999,
+				noId:0,
+				showAdviser:false,
+				loading:true,
+				isShareIn:shareIn ? true : false,
+				isOk:true
+			},
+			created:function(){
+				this.getAdviser();
+			},
+			methods:{
+				getAdviser:function(){
+					var that = this;
+					axios.get(serveUrl+'/adviser/list',{
+						params:{
+							regionId:that.cityID, //区域ID
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.adviser = response.data.data;
+						that.loading=false;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getUserInfo:function(){
+					var that = this;
+					axios.get(serveUrl+'/user/getUser',{
+						params:{
+							openId:that.openId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						var res = response.data.data;
+						that.userMsg = res;
+						sessionStorage.setItem("userInfo",JSON.stringify(res));
+						if(that.ckId==0){
+							that.showAdviser=true;
+						}else{
+							that.scan();
+						}
+					}).catch(function(error){
+						alert(error);
+					})
+				},				
+				choiceAdviser:function(id){
+					this.ckId=id;
+				},
+				gotoCity:function(){
+					sessionStorage.setItem("page","adviser");
+					location.href="city.htm";
+				},
+				confirmAdviser:function(){
+					var that = this;
+					if(that.ckId==9999){
+						alert("请先选择顾问");
+					}else{
+						that.isOk=false;
+						axios.get(serveUrl+'/user/allocation',{
+							params:{
+								openId:that.openId,
+								thirdType:'WECHAT',
+								adviserId:that.ckId,
+								regionId:that.cityID, //区域ID
+							}
+						}).then(function(response){
+							if(!response.data.state){
+								that.getUserInfo();
+							}else{
+								alert(response.data.message);
+							}
+						}).catch(function(error){
+							alert(error);
+						})
+					}
+				},
+				scan:function(){
+					if(sessionStorage.getItem('shareIn')){
+						location.href="detail.htm?cid="+sessionStorage.getItem('shareCourseId');
+					}else{
+						location.href="list.htm";
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>

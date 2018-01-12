@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-修改个人信息</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>	
+
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>修改个人信息</h3>
+	</div>
+	<div class="pay-main">
+		<div class="pay-item clearfix">
+			<span>姓名<i>*</i></span>
+			<input class="text" type="text" v-model="name"  required="required" placeholder="请输入您的真实姓名">
+		</div>
+		<div class="pay-item clearfix">
+			<span>电话</span>
+			<input class="text" type="tel" v-model="phone" readonly="readonly"  required="required" placeholder="最新成团价将短信通知您">
+		</div>
+		<div class="pay-item clearfix">
+			<span>微信<i>*</i></span>
+			<input class="text" type="text" v-model="weixin"  placeholder="请输入您的微信号">
+		</div>
+		<div class="pay-item clearfix">
+			<span>邮箱<i>*</i></span>
+			<input class="text" type="email" v-model="email"  placeholder="输入有效邮箱可接收offer">
+		</div>
+
+	</div>
+
+	<div class="city-footer" @click="okUpdate">确定修改</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		var v = new Vue({
+			el:"#app",
+			data:{
+				userMsg:userInfo,
+				name:userInfo.name,
+				phone:userInfo.phone,
+				weixin:userInfo.username,
+				email:userInfo.email,
+				isShowKefu:false
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				okUpdate:function(){
+					var that = this;
+					if(!that.name || !that.weixin || !that.email){
+						alert("用户名称、微信号、邮箱是必填项");
+						return false;
+					}
+					axios.get(serveUrl+'/user/update',{
+						params:{
+							name:that.name,
+							email:that.email,
+							username:that.weixin,
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						if(response.data.data){
+							that.userMsg.name=that.name;
+							that.userMsg.email=that.email;
+							that.userMsg.username=that.weixin;
+							sessionStorage.setItem("userInfo",JSON.stringify(that.userMsg));
+							alert("修改成功");
+						}else{
+							alert("修改失败:"+response.data.message);
+						}
+					}).catch(function(error){
+						alert(error);
+					})
+				}
+			}
+		})
+	</script>
+</body>
+</html>

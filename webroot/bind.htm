@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-绑定个人信息</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171114">
+</head>
+<body class="bind-body">
+
+<div id="app" v-cloak>
+
+	<div class="first-in">
+		<div class="step01">
+			<div class="bag">
+				<img src="img/reg.png"/>
+				<div class="f-i-text">
+					恭喜您<br>
+					获得$5<br>
+					新用户优惠
+				</div>
+			</div>
+			
+			<div class="f-i-input">
+				<div class="f-input">
+					<input type="text" v-model="wechatNumber" placeholder="请输入微信号">
+				</div>
+				<div class="f-input">
+					<input type="tel" v-model="phoneNumber" placeholder="请输入电话号码">
+				</div>
+				<div class="f-input">
+					<input type="number" v-model="smsCode" placeholder="请输入短信验证码">
+					<button v-if="sms"  class="get-sms get-sms2">{{timer}}s</button>
+					<button v-else class="get-sms" @click="getSms">获取验证码</button>
+				</div>
+				<div v-if="isGet" class="get-now" @click="getNow">立即领取</div>
+				<div v-else class="get-now">领取中...</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>	
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var openId = haha.getQuery('openId');
+		var popenId = sessionStorage.getItem('popenId');
+
+		if(openId){
+			sessionStorage.setItem("openId",openId);
+		}else{
+			openId = sessionStorage.getItem("openId");
+		}
+
+		var v = new Vue({
+			el:'#app',
+			data:{
+				openId:openId,
+				popenId:popenId,
+				sms:false,
+				timer:59,
+				wechatNumber:'',
+				phoneNumber:'',
+				smsCode:'',
+				saveSms:'',
+				isGet:true,
+				loading:true			
+			},
+			created:function(){
+				this.getUserInfo();
+			},
+			methods:{
+				getUserInfo:function(){
+					var that = this;
+					axios.get(serveUrl+'/user/getUser',{
+						params:{
+							openId:that.openId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						var res = response.data.data;
+						sessionStorage.setItem("userInfo",JSON.stringify(res));
+						if(that.openId==that.popenId){
+							location.href="detail.htm?cid="+sessionStorage.getItem('shareCourseId');
+						}else{
+							if(res.phone){
+								if(res.adviserId){
+									location.href="detail.htm?cid="+sessionStorage.getItem('shareCourseId');
+								}else{
+									location.href="choose-adviser.htm";
+								}
+							}else{
+								that.loading=false;
+							}
+						}
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getSms:function(){
+					var that = this;
+					if(!that.phoneNumber){
+						alert("请输入电话号码");
+						return;
+					}
+					//验证手机号码是否已绑定
+					axios.get(serveUrl+'/SMS/isPhoneExitst',{
+						params:{
+							phone:that.phoneNumber
+						}
+					}).then(function(response){
+						if(response.data.state){
+							alert(response.data.message);
+							return;
+						}else{
+							if(response.data.data){
+								alert("该手机号已被绑定");
+								return;
+							}else{
+								//发送验证码
+								that.sms=true;
+								var t = setInterval(function(){
+									that.timer--;
+									if(that.timer==0){
+										that.sms=false;
+										that.timer = 59;
+										clearInterval(t);
+									}
+								},1000);
+
+								axios.get(serveUrl+'/SMS/getCode',{
+									params:{
+										phone:that.phoneNumber
+									}
+								}).then(function(response2){
+									if(response2.data.state){
+										alert(response2.data.message);
+										return;
+									}else{
+										that.saveSms = response2.data.data;
+									}
+								}).catch(function(error){
+									alert(error);
+								})
+							}
+						}
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getNow:function(){
+					var that = this;
+					if(!that.phoneNumber){
+						alert("请输入电话号码");
+						return;
+					}
+					if(!that.smsCode || that.smsCode != that.saveSms){
+						alert("请输入正确的短信验证码");
+						return;
+					}
+					that.isGet=false;
+					//提交
+					axios.get(serveUrl+'/user/regist',{
+						params:{
+							phone:that.phoneNumber,
+							username:that.wechatNumber,
+							openId:that.openId,
+							thirdType:"WECHAT",
+							identifyingCode:that.smsCode
+						}
+					}).then(function(response){
+						if(!response.data.state){
+							//调个人信息接口
+							axios.get(serveUrl+'/user/getUser',{
+								params:{
+									openId:that.openId,
+									thirdType:"WECHAT"
+								}
+							}).then(function(response){
+								var res = response.data.data;
+								console.log(res);
+								sessionStorage.setItem("userInfo",JSON.stringify(res));
+								//that.isGet=true;
+								location.href="choose-adviser.htm";
+
+							}).catch(function(error){
+								alert(error);
+							})
+							
+						}else{
+							alert(response.data.message);
+							return false;
+						}
+					}).catch(function(error){
+						alert(error);
+					})	
+				}
+			}
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>团购</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body class="pay-order-body">
+
+<div id="app" v-cloak>	
+
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>指南针拼团-下单</h3>
+	</div>
+
+	<div class="pay-main">
+
+		<template v-if="!hasOrder">
+			<div class="pay-item clearfix">
+				<span>姓名<i>*</i></span>
+				<input class="text" type="text" v-model="name" name="username" required="required" placeholder="请输入您的真实姓名">
+			</div>
+			<div class="pay-item clearfix">
+				<span>邮箱<i>*</i></span>
+				<input class="text" type="email" v-model="email" name="emai" placeholder="输入有效邮箱可接收offer">
+			</div>
+		</template> 
+
+		<div class="pay-item pay-course-info clearfix">
+			<div class="pay-thumb">
+				<img v-if="course.logo" :src="course.logo" alt="">
+				<img v-else src="img/course.jpg" alt="">
+			</div>
+			<div class="pay-info">
+				<div class="p-i-name">{{course.name}}</div>
+				<div class="p-i-area">区域：{{cityName}}</div>
+				<div class="p-i-price">
+					<p>当前团价：${{nowPrice}}</p>
+					<p>最低团价可达：${{minPrice}}</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="pay-item c-methods clearfix">
+			<div v-for="item in payMethods" class="order-pay-methods" :class="[$index==0 ? 'wechat-pay':'paypal-pay']" @click="myPayMethod($index)">
+				<div class="pay-method-name"><i class="iconfont" v-if="$index==0">&#xe611;</i><i class="iconfont" v-if="$index==1">&#xe604;</i><i class="iconfont" v-if="$index==2">&#xe618;</i>{{item.text}}</div>
+				<div class="is-choice">
+					<i v-if="($index+1)==payMethod" class="iconfont yes-ck">&#xe656;</i>
+					<i v-else class="iconfont no-ck">&#xe6d7;</i>
+				</div>
+			</div>
+		</div>
+
+		<div class="pay-item clearfix">
+			<span>可用余额</span>
+			<div class="balance-num">${{balance}}</div>
+			<input v-model="ckd" type="checkbox" checked="checked">
+		</div>
+
+		<div class="brand">指南针集团出品</div>
+
+	</div>
+
+	<div v-if="isPay" class="go-pay" @click="pay">立即支付 ${{course.preAmount}} 预付款</div>
+	<div v-else class="go-pay">订单创建中...</div>
+
+	<div class="pay-lead" v-show="cardPayShow">
+		<div class="known-btn" @click="cardPay">我知道了，现在去支付</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var cid = sessionStorage.getItem('cityID');
+		var popenId = sessionStorage.getItem('popenId');
+		if(!cid){
+			alert("请先选择区域");
+			location.href='city.htm';
+		}
+		var ckName = sessionStorage.getItem('ckName');
+		var courseID = sessionStorage.getItem('courseID');
+		if(!courseID){
+			alert("课程ID错误");
+			history.back();
+		}
+		var userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		var storageAdv = userInfo.adviserDto;
+		console.log(userInfo);
+		var v = new Vue({
+			el:"#app",
+			data:{
+				popenId:popenId ? popenId : 0,
+				userMsg:userInfo,
+				name:'',
+				email:'',
+				cityID:cid?cid:0,
+				cityName:ckName,
+				courseID:courseID,
+				adviser:null,
+				course:null,
+				hasOrder:userInfo.email ? true : false,
+				adviserId:storageAdv ? storageAdv.id : 0,
+				balance:0,
+				ckd:true,
+				minPrice:0,
+				nowPrice:0,
+				payMethods:[
+					{
+						id:1,
+						text:'微信支付'
+					},
+					{
+						id:2,
+						text:'信用卡或借记卡支付'
+					},
+					{
+						id:3,
+						text:'Paypal支付'
+					}
+				],
+				payMethod:1,
+				isPay:true,
+				isShowKefu:false,
+				isApp:sessionStorage.getItem("isApp"),
+				cardPayShow:false,
+				loading:true
+			},
+			created:function(){
+				this.getDetail();
+				this.getBalance();
+				this.getMinPrice();
+				this.getNowPrice();
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				getDetail:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/getById',{
+						params:{
+							id:that.courseID,
+							regionId:that.cityID
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.course = response.data.data;
+						that.loading=false;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getBalance:function(){
+					var that = this;
+					axios.get(serveUrl+'/user/showBalance',{
+						params:{
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.balance = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getMinPrice:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/minPrice',{
+						params:{ 
+							id:that.courseID,
+							regionId:that.cityID
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.minPrice = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getNowPrice:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/nowPrice',{
+						params:{ 
+							id:that.courseID,
+							regionId:that.cityID
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.nowPrice = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				addOrder:function(){
+					var that = this;
+					console.log(that.userMsg.authOpenId);
+					console.log(that.popenId);
+					var para = {
+							subjectId:that.courseID,
+							num:1,
+							balancePayAmount:that.balance,
+							adviserId:that.adviserId,
+							regionId:that.cityID,
+							openId:that.userMsg.authOpenId,
+							introducerOpenId:that.popenId,
+							thirdType:"WECHAT"
+						};
+					if(!that.ckd){
+						para.balancePayAmount = 0;
+					}
+					
+					axios.get(serveUrl+'/order/add',{
+						params:para
+					}).then(function(response){
+						if(response.data.state){ //不成功
+							that.isPay=true;
+							alert(response.data.message);
+							return ;
+						}else{
+							var orderID = (response.data.data); //订单ID
+							sessionStorage.setItem("orderId",orderID);
+							if(that.ckd){ //使用余额
+								if(that.balance<that.course.preAmount){ //余额小于预付款
+									that.realPay(orderID);
+								}else{
+									location.href="success.htm";
+								}
+							}else{ //未使用余额
+								that.realPay(orderID);
+							}
+						}
+						
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				realPay:function(orderID){
+					var that = this;
+					var payUrl = '';
+					var ua = navigator.userAgent.toLowerCase();
+					if(that.payMethod==1){ //微信支付
+						payUrl = '/royalPay/pay';
+					}else if(that.payMethod==2){ //卡
+						if(!that.isApp){
+							that.cardPayShow = true;
+							return;
+						}else{
+							payUrl = '/paypal/pay';
+							if (/iphone|ipad|ipod/.test(ua)) {
+								window.webkit.messageHandlers.AppCardPay.postMessage(
+									{code: 1, msg: '卡支付', orderId: orderID}
+								)
+							}else if (/android/.test(ua)){
+								window.AppCardPay.postMessage(
+									JSON.stringify({code: 1, msg: '卡支付', orderId: orderID})
+								)
+							};
+							return;
+						}
+					}else if(that.payMethod==3){ //payPal支付
+						payUrl = '/paypal/pay';
+						if(that.isApp){
+							if (/iphone|ipad|ipod/.test(ua)) {
+								window.webkit.messageHandlers.AppPaypal.postMessage(
+									{code: 1, msg: 'paypal支付', orderId: orderID}
+								)
+							}else if (/android/.test(ua)){
+								window.AppPaypal.postMessage(
+									JSON.stringify({code: 1, msg: 'paypal支付', orderId: orderID})
+								)
+							};
+							return;
+						}
+					}
+					axios.get(serveUrl+payUrl,{
+						params:{ 
+							orderId:orderID,
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						that.isPay=true;
+						location.href=response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				cardPay:function(){
+					var that = this;
+					var orderID = sessionStorage.getItem("orderId");
+					var payUrl = '/paypal/pay';
+					that.cardPayShow = false;
+					axios.get(serveUrl+payUrl,{
+						params:{ 
+							orderId:orderID,
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						that.isPay=true;
+						location.href=response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				myPayMethod:function(idx){
+					this.payMethod = idx+1;
+				},
+				pay:function(){
+					var that = this;
+					
+					if(!that.hasOrder){
+						if(!that.name || !that.email){
+							alert("姓名、邮箱必填");
+							return false;
+						}
+						that.isPay=false;
+						//第一次下单之前补充个人信息
+						axios.get(serveUrl+'/user/update',{
+							params:{
+								name:that.name,
+								email:that.email,
+								openId:that.userMsg.authOpenId,
+								thirdType:"WECHAT"
+							}
+						}).then(function(response){
+							console.log(response.data.data);
+							that.userMsg.name=that.name;
+							that.userMsg.email=that.email;
+							sessionStorage.setItem("userInfo",JSON.stringify(that.userMsg));
+							console.log(sessionStorage.getItem("userInfo"));
+							// 增加订单
+							that.addOrder();
+						}).catch(function(error){
+							alert(error);
+						})
+					}else{
+						that.isPay=false;
+						that.addOrder();
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="au.com.zhinanzhen.tb.dao.SubjectDAO">
+	<select id="selectSubjectByCategoryIdAndRegionId" resultType="au.com.zhinanzhen.tb.dao.pojo.SubjectDO">
+		select
+		m.id,
+		m.name,
+		m.logo,
+		m.price,
+		m.start_date as startDate,
+		m.end_date as endDate,
+		m.state,
+		m.category_id as categoryId,
+		n.name as categoryName,
+		m.pre_amount as preAmount,
+		m.codex,
+		m.details,
+		m.region_ids as regionIds
+		from tb_subject m left join 
+		tb_subject_category n on 
+		m.category_id = n.id
+		WHERE
+		1 = 1
+		<if test="categoryId != 0">
+			AND m.category_id = #{categoryId}
+		</if>
+		<if test="regionId != 0">
+			AND m.region_ids LIKE '%${regionId}%'
+		</if>
+		<if test="classify == 'ALL'">
+			AND m.state != 'DELETE'
+		</if>
+		<if test="classify == 'AVAILABLE'">
+			AND (m.state = 'WAIT' OR m.state = 'START')
+			AND m.end_date >
+			now()
+		</if>
+		<if test="classify == 'WAIT'">
+			AND m.state = 'WAIT'
+		</if>
+		<if test="classify == 'START'">
+			AND m.state = 'START'
+		</if>
+		<if test="classify == 'END'">
+			AND m.state = 'END'
+		</if>
+		<if test="classify == 'STOP'">
+			AND m.state = 'STOP'
+		</if>
+		ORDER BY m.weight DESC
+	</select>
+
+	<select id="selectById" resultType="au.com.zhinanzhen.tb.dao.pojo.SubjectDO">
+		select
+		m.id,
+		m.name,
+		m.logo,
+		m.price,
+		m.start_date as startDate,
+		m.end_date as endDate,
+		m.state,
+		m.category_id as categoryId,
+		n.name as categoryName,
+		m.pre_amount as preAmount,
+		m.codex,
+		m.details,
+		m.region_ids as regionIds
+		from tb_subject m left join 
+		tb_subject_category n on 
+		m.category_id = n.id
+		where
+		m.id =#{id}
+	</select>
+	<update id="updateStateByDate">
+		update tb_subject
+		set state =
+		#{state}
+		where id =
+		#{id}
+	</update>
+</mapper>

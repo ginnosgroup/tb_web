@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-拼团列表</title>
+	<link rel="stylesheet" href="css/swiper.min.css">
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+
+	
+<div id="app" v-cloak>
+
+	<header>
+		<div class="zone" @click="goCity">{{cName}} <i class="iconfont">&#xe661;</i></div>
+		<h3>指南针拼团</h3>
+		<div class="face" @click="showMy"><img :src="userMsg.logo" alt=""></div>
+	</header>
+
+	<div class="nav-wrap">
+		<nav :class="{'fixed-nav' : isFixed}">
+			<div id="topNav" class="swiper-container" @click="mySwiper">
+				<div class="swiper-wrapper">
+					<div v-for="item in nav"  class="swiper-slide" :class="[$index==clickIndex ? 'active' : '']" @click="ckNav(item.id)"><span>{{item.name}}</span></div>
+				</div>
+			</div>
+		</nav>
+	</div>
+
+	<div v-if="banner" class="banner" v-show="clickIndex==0">
+		<div id="nav" class="swiper-container">
+		    <div class="swiper-wrapper">
+		        <div v-for="item in banner" class="swiper-slide"><img :src="item.imgSrc" alt=""></div>
+		    </div>
+		    <!-- 如果需要分页器 -->
+		    <div class="swiper-pagination"></div>
+		</div>	
+	</div>
+
+	<div class="course">
+		<template v-if="courses.length">
+			<div  class="c-item" v-for="course in courses" >
+				<div class="cc-wrap" @click="enterDetail(course.id)">
+					<div class="c-top">
+						<a :href="'detail.htm?cid='+course.id" v-if="course.logo"><img :src="course.logo" alt=""></a>
+						<a :href="'detail.htm?cid='+course.id" v-else><img src="img/course.jpg" alt=""></a>
+						<!-- <span>热门</span> -->
+					</div>
+					<div class="c-bottom">
+						<div class="c-name"><a :href="'detail.htm?cid='+course.id">{{course.name}}</a> <span>市场价 <del>${{course.price}}</del></span></div>
+						<div class="c-rule">
+							<h5>拼团规则：</h5>
+							<div class="rule-content" v-html="course.codex">
+							</div>
+						</div>
+						<div class="c-time">
+							<template v-if="course.state=='END' ">
+								<div class="c-t-t">该团已结束：</div>
+								<div class="c-t-m"><span>0</span>天<span>0</span>时<span>0</span>分</div>
+							</template>
+							<template v-if="course.state=='WAIT' ">
+								<div class="c-t-t">距离开始还有：</div>
+								<div class="c-t-m"><span>{{course.startDate | getGroupDay}}</span>天<span>{{course.startDate | getGroupHour}}</span>时<span>{{course.startDate | getGroupMinu}}</span>分</div>
+							</template>
+							<template v-if="course.state=='START' ">
+								<div class="c-t-t">距离结束还有：</div>
+								<div class="c-t-m"><span>{{course.endDate | getGroupDay}}</span>天<span>{{course.endDate | getGroupHour}}</span>时<span>{{course.endDate | getGroupMinu}}</span>分</div>
+							</template>
+						</div>
+					</div>
+
+					<div class="progress-bar">
+						<div class="bg-bar"></div>
+						<div v-if="course.buyNumber" class="cur-bar" :style="{width:getBarPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}"></div>
+						<div class="start-num">
+							<span v-for="sub in course.subjectPriceDtolist" :style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">{{sub.startNum}}</span>
+						</div>
+						<div class="zone-price">
+							<span v-for="sub in course.subjectPriceDtolist" :style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">${{sub.price}}</span>
+						</div>
+						<div v-if="course.buyNumber" class="have-nums" :style="{left:getPersonPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}">已团 <span>{{course.buyNumber}}</span> 人</div>
+						<div class="nums" v-else>已团 <span>0</span> 人</div>
+					</div>
+				</div>
+
+				<div class="c-btn c-start clearfix" v-if="course.state=='START'">
+					<!-- <div class="c-share">邀请好友参团</div> -->
+					<div class="c-pay c-my-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+				</div>
+				<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
+					<!-- <div class="c-share">邀请好友参团</div> -->
+					<div class="c-pay c-my-pay">待开团</div>
+				</div>
+				<div class="c-btn c-end" v-if="course.state=='END'">
+					<div class="c-over">该团已结束</div>
+				</div>
+				<div class="c-btn c-end" v-if="course.state=='STOP'">
+					<div class="c-over">该团已终止</div>
+				</div>
+				<div class="c-btn c-end" v-if="course.state=='DELETE'">
+					<div class="c-over">该团已删除</div>
+				</div>
+
+			</div>
+		</template>
+		<div class="no-data no-course" v-else>该类目下暂无课程</div>
+	</div>
+
+	<footer>
+		<div class="f-title">咨询客服</div>
+		<div class="f-tel">
+			<p>澳洲总部：  <a href="tel:+61 292831227">+61 292831227</a></p>
+			<p>中国总部：<a href="tel:010-82887260">（010）82887260</a></p>
+		</div>
+	</footer>
+
+	<!-- 侧边栏 -->
+	<div class="index-wrap" v-show="wrap" @click="hideMy"></div>
+	<div class="index-aside" :class="classObj">
+		<div class="index-face" @click="update">
+			<img :src="userMsg.logo" alt="">
+			<span>{{userMsg.nickname}}</span>
+			<i class="iconfont">&#xe6a3;</i>
+		</div>
+		<div class="personal-center">
+			<ul>
+				<li><a href="order.htm"><i class="iconfont">&#xe699;</i><span>我的订单</span></a></li>
+				<li><a href="recommend.htm"><i class="iconfont">&#xe6e1;</i><span>我的推荐</span></a></li>
+				<li><a href="adviser.htm"><i class="iconfont">&#xe6cb;</i><span>我的顾问</span></a></li>
+				<li><a href="set.htm"><i class="iconfont">&#xe68a;</i><span>设置</span></a></li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+</div>
+
+	
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script src="js/swiper.min.js"></script>
+
+	<script>
+		haha.init(); //初始化字体大小
+		var openId = sessionStorage.getItem('openId');
+		var cid = sessionStorage.getItem('cityID');
+		var cName = sessionStorage.getItem('ckName');
+		var uMsg = sessionStorage.getItem('userInfo');
+		var ckIndex = sessionStorage.getItem('ckIndex');
+		var sid = sessionStorage.getItem('sortID');
+		
+		var v = new Vue({
+			el:'#app',
+			data:{
+				userMsg:uMsg ? JSON.parse(uMsg) : null,
+				nav:null,
+				regionId:cid, //区域ID
+				cName:cName, //区域名称
+				categoryId:sid ? sid : 0, //类目ID
+				courses:null,
+				loading:true,
+				wrap:false,
+				classObj:{
+					'right-to-left':false,
+					'left-to-right':false
+				},
+				swp:null,
+				clickIndex:ckIndex?ckIndex:0,
+				openId:openId,
+				shareUrl:'',
+				isShowKefu:false,
+				isFixed:false,
+				banner:null
+			},
+			created:function(){
+				// this.getUserInfo();
+				this.updateCourse();
+				this.getNav();
+				this.getBanner();
+			},
+			ready:function(){
+				var mySwiper = new Swiper('#topNav', {
+					freeMode: true,
+					freeModeMomentumRatio: 0.5,
+					slidesPerView: 'auto',
+					observer:true,//修改swiper自己或子元素时，自动初始化swiper
+    				observeParents:true,//修改swiper的父元素时，自动初始化swiper
+				});
+				this.swp = mySwiper;
+
+				//banner
+				var mySwiper = new Swiper ('#nav', {
+					loop: true,
+					pagination: '.swiper-pagination'
+				})        
+
+				//
+				var that = this;
+				window.addEventListener('scroll', function(){
+    				if(window.scrollY>60){
+    					that.isFixed = true;
+    				}else{
+    					that.isFixed = false;
+    				}
+				})
+			},
+			filters:{
+				getGroupDay:function(gtime){
+					var d = new Date();
+					var s = d.getTime();
+					var dv = Math.abs((gtime-s))/86400000;//24*60*60*1000=86400000
+					return Math.floor(dv);
+				},
+				getGroupHour:function(gtime){
+					var d = new Date();
+					var s = d.getTime();
+					var dv = Math.abs((gtime-s))/86400000;//24*60*60*1000=86400000
+					return Math.floor((dv-Math.floor(dv))*24);
+				},
+				getGroupMinu:function(gtime){
+					var d = new Date();
+					var s = d.getTime();
+					var dv = Math.abs((gtime-s))/86400000;//24*60*60*1000=86400000
+					var cD = Math.floor(dv);
+					var cH = Math.floor((dv-cD)*24);
+					var cM = (((dv-cD)*24)-cH)*60;
+					return Math.floor(cM);
+				}
+			},
+			methods:{
+				mySwiper:function(){
+
+					var swiper = this.swp;
+					this.clickIndex = swiper.clickedIndex;
+					sessionStorage.setItem('ckIndex',this.clickIndex);
+					var swiperWidth = swiper.container[0].clientWidth; //可以通过mySwiper.container[0]得到container的HTML元素
+					var maxTranslate = swiper.maxTranslate(); //最大左移距离
+					var maxWidth = -maxTranslate + swiperWidth / 2;
+
+					var slide = swiper.slides[swiper.clickedIndex];  //通过mySwiper.slides[1]获取特定的slide
+					var slideLeft = slide.offsetLeft; //slide离左边宽度
+					var slideWidth = slide.clientWidth; //slide宽度
+					var slideCenter = slideLeft + slideWidth / 2;
+					
+					// 被点击slide的中心点
+					swiper.setWrapperTransition(300); //手动设置wrapper的位移。translate：必选，位移值（单位px）。
+					if (slideCenter < swiperWidth / 2) {
+						swiper.setWrapperTranslate(0);
+					} else if (slideCenter > maxWidth) {
+						swiper.setWrapperTranslate(maxTranslate);
+					} else {
+						var nowTlanslate = slideCenter - swiperWidth / 2;
+						swiper.setWrapperTranslate(-nowTlanslate);
+					}
+					
+				},
+				getBanner:function(){
+					if(this.regionId==1000000){
+						this.banner = [
+							{
+								id:1,
+								imgSrc:'img/banner/banner-01-'+this.regionId+'.jpg',
+							},
+							{
+								id:2,
+								imgSrc:'img/banner/banner-02-'+this.regionId+'.png',
+							}
+						];
+					}
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				getUserInfo:function(){
+					var that = this;
+					axios.get(serveUrl+'/user/getUser',{
+						params:{
+							openId:that.openId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						that.userMsg = response.data.data;
+						sessionStorage.setItem("userInfo",JSON.stringify(that.userMsg));
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				goCity:function(){
+					sessionStorage.setItem('isCity','yes'); //控制城市选择页面上的返回按钮
+					location.href="city.htm";
+				},
+				getNav:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/category',{
+						params:{
+							classify:'ENABLED'
+						}
+					}).then(function(response){
+						that.nav = response.data.data;
+						if(that.categoryId==0){
+							that.categoryId = that.nav[0].id;
+						}
+						that.getCourseList();
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				ckNav:function(nid){
+					sessionStorage.setItem('sortID',nid);
+					this.categoryId = nid;
+					window.scrollTo(0,0);
+					this.getCourseList();
+				},
+				updateCourse:function(){
+					axios.get(serveUrl+'/subject/update').then(function(response){
+						console.log(response.data.data);
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getCourseList:function(){
+					var that = this;
+					that.loading=true;
+					axios.get(serveUrl+'/subject/getBycategoryId',{
+						params:{
+							classify:'ALL',
+							categoryId:that.categoryId,
+							regionId:that.regionId
+						}
+					}).then(function(response){
+						that.loading=false;
+						console.log(response.data.data);
+						that.courses = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getPercent:function(cur,obj){
+					var total = 0;
+					var len = obj.length;
+					var percent=0;
+					if(len==1){
+						percent=20;
+					}else{
+						var lst = obj[len-1].startNum;
+						total = lst+lst*0.2;
+						console.log(total);
+						percent = Math.round((cur/total)*100);
+					}
+					
+					return percent;
+				},
+				getBarPercent:function(cur,obj){
+					var total = 0;
+					var len = obj.length;
+					var percent=0;
+					var lst = obj[len-1].startNum;
+					total = lst+lst*0.2;
+					percent = Math.round((cur/total)*100);
+					if(percent>100){
+						percent=100;
+					}
+					return percent;
+				},
+				getPersonPercent:function(cur,obj){
+					var total = 0;
+					var len = obj.length;
+					var percent=0;
+					var lst = obj[len-1].startNum;
+					total = lst+lst*0.2;
+					percent = Math.round((cur/total)*100);
+					if(percent>80){
+						percent=80;
+					}
+					return percent;
+				},
+				goPay:function(courseId){
+					sessionStorage.setItem('courseID',courseId);
+					location.href="pay-order.htm";
+				},
+				showMy:function(){
+					this.wrap=true;
+					this.classObj={
+						'right-to-left':true,
+						'left-to-right':false
+					};
+				},
+				hideMy:function(){
+					this.wrap=false;
+					this.classObj={
+						'right-to-left':false,
+						'left-to-right':true
+					};
+				},
+				update:function(){
+					location.href="update.htm";
+				},
+				enterDetail:function(id){
+					location.href="detail.htm?cid="+id;
+				}
+			}
+		})
+
+
+	</script>
+</body>
+</html>

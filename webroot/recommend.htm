@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-我的推荐</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>	
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>我的推荐</h3>
+		<div class="rcd-rule" @click="showRule">规则</div>
+	</div>
+
+	<div class="recommend">
+
+		<!-- <div class="no-data">您暂时没有推荐哦，赶快推荐赚取小费吧！</div> -->
+		<div class="rec-all-price">
+			<p>收益总计</p>
+			<b>${{balance+usedBalance}}</b>
+		</div>
+
+		<div class="rec-get-price">
+			<div class="rec-price">
+				可用余额：<span>${{balance}}</span> <br>
+				已用余额：${{usedBalance}}
+			</div>
+			<div class="rec-price-btn" @click="showCash">提现</div>
+		</div>
+
+		<div class="record">
+			<div class="tit">我的推荐明细</div>
+			<div class="rcd"> 
+				<template v-if="userMsg.recommendUserDO || team">
+					<div v-if="userMsg.recommendUserDO" class="rcd-item clearfix">
+						<div class="r-time">{{userMsg.recommendUserDO.createDate | getOrderDay}}</div>
+						<div class="r-info">{{userMsg.recommendUserDO.nickname}} 推荐了您，您作为新用户获得$5</div>
+						<div class="r-price">已赚 $5</div>
+					</div>
+					<div v-if="team" v-for="item in team" class="rcd-item clearfix">
+						<div class="r-time">{{item.createDate | getOrderDay}}</div>
+						<div class="r-info">{{item.userDo.nickname}}通过您的分享成功下单，您获得$5</div>
+						<div class="r-price">已赚 $5</div>
+					</div>
+				</template>
+				<template v-else>
+					<div class="no-rec">还没有任何明细</div>
+				</template>
+			</div>
+		</div>
+
+		<div class="rcm-tips">
+			<p>1.被推荐用户下单并支付：推荐人记录一条推荐，并且收益可使用</p>
+			<p>2.余额可抵尾款使用，截团时，尾款=成团价-预付款-可用余额</p>
+			<p>3.购买新课程，如果有余额，可以先扣减可用余额，再支付剩余的金额。</p>
+		</div>
+
+
+	</div>
+
+	<div class="rec-wrap" v-show="isShow">
+		<div class="rule-info">
+			拼团推荐规则：<br><br>
+			1.下单并支付：视为推荐成功，此时该笔收益可用<br>
+			2.使用后，该笔收益将被置为已使用。<br>
+			3.使用限制：已到账金额可使用抵尾款，也可以在线购买新课程（仅限自己使用）<br>
+			4.余额达到 $100 即可提现<br><br>
+			所有解释权归指南针所有<br>
+		</div>
+		<div class="rule-btn" @click="hideRule">返回</div>
+	</div>
+
+	<!-- 提现 -->
+	<div class="get-cash-wrap" v-show="isGetCash">
+		<div class="enough-wrap">
+			<div class="enough" v-if="balance>=100">
+				<img src="img/kefu.jpg" alt="">
+				<p>指南针老中医为您核实并提现</p>
+			</div>
+			<div class="not-enough" v-else>满$100才可以提现哦！<br>赶快去分享赚取小钱吧!</div>
+			<div class="close-enough" @click="hideCash">返回</div>
+		</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>	
+
+</div>
+	
+
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+		var v = new Vue({
+			el:"#app",
+			data:{
+				userMsg:userInfo,
+				balance:0,
+				usedBalance:0,
+				team:null,
+				isShow:false,
+				isShowKefu:false,
+				isGetCash:false,
+				loading:true
+			},
+			created:function(){
+				this.getBalance();
+				this.getUsedBalance();
+				this.getFriends();
+			},
+			filters:{
+				getOrderDay:function(num){
+					var d = new Date(num);
+					var od = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+					return od;
+				}
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				getBalance:function(){ //余额查询
+					var that = this;
+					axios.get(serveUrl+'/user/showBalance',{
+						params:{
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						that.balance = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getUsedBalance:function(){ //已用余额
+					var that = this;
+					axios.get(serveUrl+'/user/showBalancePayMoney',{
+						params:{
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						that.usedBalance = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getFriends:function(){
+					var that = this;
+					axios.get(serveUrl+'/order/listByIntroducer',{
+						params:{
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						var res = response.data.data;
+						if(res.length){
+							that.team = res;
+						}
+						that.loading=false;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				showRule:function(){
+					this.isShow=true;
+				},
+				hideRule:function(){
+					this.isShow=false;
+				},
+				showCash:function(){
+					this.isGetCash=true;
+				},
+				hideCash:function(){
+					this.isGetCash=false;
+				}
+			}
+		})
+	</script>
+</body>
+</html>

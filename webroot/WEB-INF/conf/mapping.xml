@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dozer.sourceforge.net  
+          http://dozer.sourceforge.net/schema/beanmapping.xsd">
+
+	<configuration>
+		<stop-on-errors>false</stop-on-errors>
+		<date-format>yyyy-MM-dd</date-format>
+		<wildcard>true</wildcard>
+	</configuration>
+
+	<!-- <mapping>
+		<class-a>com.ikamobile.tmcs.controller.thrift.server.acceptor.TmcDTO
+		</class-a>
+		<class-b>cc.slyi.open.pojo.Tmc</class-b>
+		<field>
+			<a>name</a>
+			<b>name</b>
+		</field>
+		<field>
+			<a>shortName</a>
+			<b>shortName</b>
+		</field>
+		<field>
+			<a>balance</a>
+			<b>balance</b>
+		</field>
+		<field>
+			<a>point</a>
+			<b>point</b>
+		</field>
+	</mapping> -->
+
+</mappings>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-产品详情</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+	
+<div id="app" v-cloak>
+
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>{{course.name}}</h3>
+	</div>
+
+
+	<div class="pro-detail">
+
+		<div class="detail-info">
+			<div class="cc-wrap">
+				<div class="c-top">
+					<img v-if="course.logo" :src="course.logo" alt="">
+					<img v-else src="img/course.jpg" alt="">
+				</div>
+				<div class="c-bottom">
+					<div class="c-name">{{course.name}} <span>市场价 <del>${{course.price}}</del></span></div>
+					<div class="c-rule">
+						<h5>拼团规则：</h5>
+						<div class="rule-content" v-html="course.codex"></div>
+					</div>
+					<div class="c-time">
+						<template v-if="course.state=='END' ">
+							<div class="c-t-t">该团已结束：</div>
+							<div class="c-t-m"><span>0</span>天<span>0</span>时<span>0</span>分</div>
+						</template>
+						<template v-if="course.state=='WAIT' ">
+							<div class="c-t-t">距离开始还有：</div>
+							<div class="c-t-m"><span>{{course.startDate | getGroupDay}}</span>天<span>{{course.startDate | getGroupHour}}</span>时<span>{{course.startDate | getGroupMinu}}</span>分</div>
+						</template>
+						<template v-if="course.state=='START' ">
+							<div class="c-t-t">距离结束还有：</div>
+							<div class="c-t-m"><span>{{course.endDate | getGroupDay}}</span>天<span>{{course.endDate | getGroupHour}}</span>时<span>{{course.endDate | getGroupMinu}}</span>分</div>
+						</template>
+					</div>
+				</div>
+
+				<div class="progress-bar">
+					<div class="bg-bar"></div>
+					<div v-if="course.buyNumber" class="cur-bar" :style="{width:getBarPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}"></div>
+					<div class="start-num">
+						<span v-for="sub in course.subjectPriceDtolist" :style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">{{sub.startNum}}</span>
+					</div>
+					<div class="zone-price">
+						<span v-for="sub in course.subjectPriceDtolist" :style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">${{sub.price}}</span>
+					</div>
+					<div v-if="course.buyNumber" class="have-nums" :style="{left:getPersonPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}">已团 <span>{{course.buyNumber}}</span> 人</div>
+					<div class="nums" v-else>已团 <span>0</span> 人</div>
+				</div>
+			</div>
+			<div class="detail-rule clearfix">
+				<span>① 选择课程，<br>付款待成团</span>
+				<span>② 邀请并等待，<br>好友支付参团</span>
+				<span>③ 到达人数，<br>顺利成团</span>
+			</div>
+		</div>
+
+		<div class="team-person">
+			<div class="team-title">参团小伙伴们</div>
+			<div class="team-list">
+				<template v-if="team5">
+					<div v-show="show5">
+						<div v-for="item in team5" class="team-item clearfix">
+							<div class="t-i-face">
+								<img :src="item.userDo.logo" alt=""> {{item.userDo.nickname}}
+							</div>
+							<div class="t-i-price">${{item.waitPayAmount}}</div>
+							<div class="t-i-time">{{item.createDate | getOrderDay}}</div>
+						</div>
+					</div>
+					<div v-show="showAll">
+						<div v-for="item in team" class="team-item clearfix">
+							<div class="t-i-face">
+								<img :src="item.userDo.logo" alt=""> {{item.userDo.nickname}}
+							</div>
+							<div class="t-i-price">${{item.waitPayAmount}}</div>
+							<div class="t-i-time">{{item.createDate | getOrderDay}}</div>
+						</div>
+					</div>
+				</template>
+				<template v-else>
+					<div class="no-team">还没有参团小伙伴</div>
+				</template>
+
+			</div>
+			<div v-if="teamLen>5 && showMore" class="see-more" @click="seeMore">查看更多</div>
+			<div v-if="teamLen>5 && !showMore" class="see-more" @click="hideMore">收起</div>
+		</div>
+
+		<div class="team-person">
+			<div class="team-title">课程详情</div>
+			<div class="course-detail" v-html="course.details"></div>
+		</div>
+
+	</div>
+
+	<div class="detail-footer">
+		<div class="c-btn c-start clearfix" v-if="course.state=='START'">
+			<div class="c-share" @click="share">邀请好友参团</div>
+			<div class="c-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+		</div>
+		<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
+			<div class="c-share" @click="share">邀请好友参团</div>
+			<div class="c-pay">待开团</div>
+		</div>
+		<div class="c-btn c-end" v-if="course.state=='END'">
+			<div class="c-over">该团已结束</div>
+		</div>
+		<div class="c-btn c-end" v-if="course.state=='STOP'">
+			<div class="c-over">该团已终止</div>
+		</div>
+		<div class="c-btn c-end" v-if="course.state=='DELETE'">
+			<div class="c-over">该团已删除</div>
+		</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userInfo.adviserDto" :src="userInfo.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+	<div class="share-arrow" v-show="isShare">
+		<div class="i-known" @click="closeShare">我知道了</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>	
+
+</div>
+
+	<script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		
+		var userInfo = sessionStorage.getItem("userInfo");
+		var openId = sessionStorage.getItem("openId");
+
+		var cid = haha.getQuery('cid');
+		var regionId = haha.getQuery('regionId');
+		var cityName = decodeURIComponent(haha.getQuery('cityName'));
+		var popenId = haha.getQuery('popenId'); //推荐人的openid
+
+		if(regionId){
+			sessionStorage.setItem('cityID',regionId);
+		}else{
+			var cityID = sessionStorage.getItem('cityID');
+		}
+		if(cityName!='false'){
+			sessionStorage.setItem('ckName',cityName);
+		}else{
+			var curCityName = sessionStorage.getItem('ckName');
+		}
+
+		if(popenId){
+			sessionStorage.setItem('popenId',popenId);
+			sessionStorage.setItem('shareCourseId',cid);
+			sessionStorage.setItem('shareIn','yes');
+			location.href="index.htm";
+		}
+		
+		var v = new Vue({
+			el:"#app",
+			data:{
+				cid:cid,
+				cityID:cityID ? cityID : 0,
+				cityName:curCityName ? curCityName : '全部',
+				course:null,
+				userInfo:userInfo ? JSON.parse(userInfo) : '',
+				openId:openId,
+				isShare:false,
+				loading:true,
+				day:0,
+				hours:0,
+				isShowKefu:false,
+				isApp:sessionStorage.getItem("isApp"),
+				shareData:null,
+				team5:null,
+				team:null,
+				teamLen:0,
+				showMore:true,
+				show5:true,
+				showAll:false
+			},
+			created:function(){
+				this.getFriends();
+				this.getDetail();
+			},
+			ready:function(){
+				this.wxConfig();
+			},
+			filters:{
+				getGroupDay:function(gtime){
+					var d = new Date();
+					var s = d.getTime();
+					var dv = Math.abs((gtime-s))/86400000;//24*60*60*1000=86400000
+					this.day = Math.floor(dv);
+					if(this.isApp){this.setShareContent();}
+					return Math.floor(dv);
+				},
+				getGroupHour:function(gtime){
+					var d = new Date();
+					var s = d.getTime();
+					var dv = Math.abs((gtime-s))/86400000;//24*60*60*1000=86400000
+					this.hours = Math.floor((dv-Math.floor(dv))*24);
+					if(this.isApp){this.setShareContent();}
+					return Math.floor((dv-Math.floor(dv))*24);
+				},
+				getGroupMinu:function(gtime){
+					var d = new Date();
+					var s = d.getTime();
+					var dv = Math.abs((gtime-s))/86400000;//24*60*60*1000=86400000
+					var cD = Math.floor(dv);
+					var cH = Math.floor((dv-cD)*24);
+					var cM = (((dv-cD)*24)-cH)*60;
+					return Math.floor(cM);
+				},
+				getOrderDay:function(num){
+					var d = new Date(num);
+					var mm = (d.getMonth()+1)<10 ? '0'+(d.getMonth()+1) : (d.getMonth()+1),
+						dd = d.getDate()<10 ? '0'+ d.getDate() : d.getDate(),
+						hh = d.getHours()<10 ? '0' + d.getHours() : d.getHours(),
+						ii = d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes(),
+						ss = d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds();
+					var od = mm+'-'+dd+' '+hh+':'+ii+':'+ss;
+					return od;
+				}
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				seeMore:function(){
+					this.showMore = false;
+					this.show5 = false;
+					this.showAll = true;
+				},
+				hideMore:function(){
+					this.showMore = true;
+					this.show5 = true;
+					this.showAll = false;
+				},
+				share:function(){
+					var that = this;
+					console.log(this.isApp);
+					if(this.isApp){
+						var ua = navigator.userAgent.toLowerCase();
+						if (/iphone|ipad|ipod/.test(ua)) {
+							window.webkit.messageHandlers.AppShare.postMessage(
+								{code: 1, msg: '分享',data:that.shareData}
+							)
+						}else if (/android/.test(ua)){
+							window.AppShare.postMessage(
+								JSON.stringify({code: 1, msg: '分享',data:that.shareData})
+							)
+						};
+					}else{
+						this.isShare=true;
+					}
+					
+				},
+				setShareContent:function(){
+					var that = this;
+					var url = location.href.split('#')[0];
+					var shareTitle='';
+					if(that.day>=1){
+						shareTitle = '【最后'+that.day+'天】抢购成功！我抢到了【'+that.course.name+'】';
+					}else{
+						shareTitle = '【最后'+that.hours+'小时】抢购成功！我抢到了【'+that.course.name+'】';
+					}
+					var shareLink = url+'&popenId='+that.userInfo.authOpenId+'&regionId='+that.cityID+'&cityName='+encodeURIComponent(that.cityName);
+					var shareImg = httpsUrl+that.course.logo;
+
+					that.shareData={
+						title:shareTitle,
+						link: shareLink,
+						imgUrl: shareImg,
+						desc: '我已购买了课程，送你$5代金券，一起团购吧！',
+					};
+				},
+				closeShare:function(){
+					this.isShare=false;
+				},
+				getDetail:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/getById',{
+						params:{
+							id:that.cid,
+							regionId:that.cityID
+						}
+					}).then(function(response){
+						that.loading=false;
+						console.log(response.data.data);
+						that.course = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getFriends:function(){
+					var that = this;
+					axios.get(serveUrl+'/order/listBySubjectId',{
+						params:{
+							subjectId:that.cid
+						}
+					}).then(function(response){
+
+						console.log(response.data.data);
+						var res = response.data.data;
+						if(res.length){
+							that.team = res;
+							that.teamLen = res.length;
+							if(that.teamLen>5){
+								that.team5 = res.slice(0,5);
+							}else{
+								that.team5 = res;
+							}
+						}
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getPercent:function(cur,obj){
+					var total = 0;
+					var len = obj.length;
+					var percent=0;
+					if(len==1){
+						percent=20;
+					}else{
+						var lst = obj[len-1].startNum;
+						total = lst+lst*0.2;
+						console.log(total);
+						percent = Math.round((cur/total)*100);
+					}
+					
+					return percent;
+				},
+				getBarPercent:function(cur,obj){
+					var total = 0;
+					var len = obj.length;
+					var percent=0;
+					var lst = obj[len-1].startNum;
+					total = lst+lst*0.2;
+					percent = Math.round((cur/total)*100);
+					if(percent>100){
+						percent=100;
+					}
+					return percent;
+				},
+				getPersonPercent:function(cur,obj){
+					var total = 0;
+					var len = obj.length;
+					var percent=0;
+					var lst = obj[len-1].startNum;
+					total = lst+lst*0.2;
+					percent = Math.round((cur/total)*100);
+					if(percent>80){
+						percent=80;
+					}
+					return percent;
+				},
+				goPay:function(courseId){
+					sessionStorage.setItem('courseID',courseId);
+					location.href="pay-order.htm";
+				},
+				wxConfig:function(){
+					var that = this;
+					var url = location.href.split('#')[0];
+					axios.get(serveUrl+'/wxgz/config', {
+						params: {
+						  relativeUrl: url
+						}
+					}).then(function (response) {
+						console.log(JSON.stringify(response.data.data));
+						var res = response.data.data;
+						var config={};
+						for (var k in res) {
+							config[k] = res[k];
+						}
+						config.jsApiList = ['onMenuShareTimeline','onMenuShareAppMessage'];
+						config.timestamp = parseInt(config.timestamp);
+						wx.config(config);
+						wx.ready(function(){
+							console.log("微信jssdk配置成功!");
+							if(that.day>=1){
+								var shareTitle = '【最后'+that.day+'天】抢购成功！我抢到了【'+that.course.name+'】';
+							}else{
+								var shareTitle = '【最后'+that.hours+'小时】抢购成功！我抢到了【'+that.course.name+'】';
+							}
+							var shareLink = url+'&popenId='+that.userInfo.authOpenId+'&regionId='+that.cityID+'&cityName='+encodeURIComponent(that.cityName);
+							var shareImg = httpsUrl+that.course.logo;
+
+							wx.onMenuShareTimeline({ //分享到朋友圈
+							    title: shareTitle, 
+							    link: shareLink, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+							    imgUrl: shareImg, 
+							    success: function () { 
+							        // alert("分享成功");
+							    },
+							    cancel: function () { 
+							        // alert("分享取消");
+							    }
+							});
+							wx.onMenuShareAppMessage({//分享给朋友
+							    title: shareTitle, 
+							    desc: '我已购买了课程，送你$5代金券，一起团购吧！', //that.course.details
+							    link: shareLink, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+							    imgUrl: shareImg, 
+							    success: function () {
+							        // alert("分享成功");
+							    },
+							    cancel: function () {
+							        // alert("cancel");
+							    }
+							});
+						});
+						
+						wx.error(function(res){
+							console.log(JSON.stringify(res));
+							console.log('微信JSSDK配置失败！');
+						});
+
+					}).catch(function (error) {
+						alert(error);
+					});
+				}				
+			}
+		})
+	</script>
+</body>
+</html>

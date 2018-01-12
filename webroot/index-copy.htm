@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-选择城市</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+	<div class="city-header">
+		<span v-if="backBtn" @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>选择城市</h3>
+	</div>
+
+	<div class="city-main">
+		<div class="city-item" v-for="city in citys">
+			<div class="city-title">·{{city.name}}</div>
+			<ul class="city-choice clearfix">
+				<li v-for="item in city.regionList" @click="choiceCity(item.id,item.name)" :class="[item.id==ckId ? 'active':'']">{{item.name}}</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="city-footer" @click="confirmCity">确定</div>
+
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		//是否是APP
+		var isApp = Boolean(haha.getQuery('isApp'));
+		if(isApp){
+			sessionStorage.setItem("isApp",'yes');
+		}
+		var cid = sessionStorage.getItem('cityID');
+		var isCity = sessionStorage.getItem('isCity');
+		var v = new Vue({
+			el:'#app',
+			data:{
+				citys:null,
+				ckId:cid ? cid : 9999,
+				ckName:'',
+				backBtn:isCity?true:false,
+				loading:true
+			},
+			created:function(){
+				this.getParentArea();
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				login:function(){
+					var that = this;
+					axios.get('/wxgz/thirdLogin',{
+						params:{
+							url:"list.htm?cityID="+that.ckId+"&cityName="+that.ckName
+						}
+					}).then(function(response){
+						window.location.href=response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getParentArea:function(){
+					var that = this;
+					axios.get(serveUrl+'/region/all').then(function(response){
+						var res = response.data.data;
+						that.loading = false;
+						console.log(res);
+						that.citys = res;
+					}).catch(function(error){
+						alert(error);
+					});	
+				},
+				choiceCity:function(id,name){
+					this.ckId=id;
+					this.ckName=name;
+					sessionStorage.setItem('cityID',id);
+					sessionStorage.setItem('ckName',name);
+				},
+				confirmCity:function(){
+					var that = this;
+					if(this.ckId==9999){
+						alert("请选择城市");
+					}else{
+						var openId = sessionStorage.getItem("openId");
+						if(openId){ //已经登录
+							location.href="list.htm?openId="+openId+"&cityID="+that.ckId+"&cityName="+that.ckName;
+						}else{ //未登录
+							if(isApp){
+								window.webkit.messageHandlers.AppLogin.postMessage(
+									{code: 1, msg: 'APP登录'}
+								)
+							}else{
+								that.login();
+							}
+							
+						}
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>

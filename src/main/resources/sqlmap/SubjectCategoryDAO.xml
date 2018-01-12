@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="au.com.zhinanzhen.tb.dao.SubjectCategoryDAO">
+	<select id="selectSubjectCategory" resultType="au.com.zhinanzhen.tb.dao.pojo.SubjectCategoryDO">
+		select
+		id,
+		name,
+	    state
+	    from tb_subject_category
+		where 
+		1 = 1
+		<if test="classify == 'ENABLED'">
+			AND state = 'ENABLED'
+		</if>
+		<if test="classify == 'DISABLED'">
+			AND state = 'DISABLED'
+		</if>
+		<if test="classify == 'ALL'">
+			AND state != 'DELETE'
+		</if>
+		ORDER BY weight DESC
+	</select>
+
+</mapper>

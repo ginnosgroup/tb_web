@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-订单详情</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>	
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>订单详情</h3>
+	</div>
+
+	<div class="order-detail">
+
+		<div class="pay-item clearfix" @click="goDetail(orders.subjectId)">
+			<div class="pay-thumb" v-if="orders.subjectResultDto.logo"><img :src="orders.subjectResultDto.logo" alt=""></div>
+			<div class="pay-thumb" v-else><img src="img/course.jpg" alt=""></div>
+			<div class="pay-info">
+				<div class="p-i-name">{{orders.subjectResultDto.name}}</div>
+				<div class="p-i-area">区域：{{orders.regionDo.name}}</div>
+				<div class="p-i-p">
+					<p>当前团价：${{nowPrice}}</p>
+					<p>最低团价可达：${{minPrice}}</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="detail-item">
+
+			<div class="d-i">
+				<div>订单编号：{{orders.id}}</div>
+				<div>下单时间：{{orders.createDate | getOrderDay}}</div>
+				<div>订单状态：<span v-if="orders.state=='NEW'">待付款</span> <span v-if="orders.state=='WAIT'">待成团</span> <span v-if="orders.state=='SUCCESS'">已成团</span> <span v-if="orders.state=='END'">未成团</span></div>
+				<div v-if="orders.payType=='PAYPAL'">支付方式：PayPal</div>
+				<div v-if="orders.payType=='WECHAT'">支付方式：微信</div>
+				<div v-if="orders.payType=='BALANCE'">支付方式：余额</div>
+				<div v-if="orders.payType=='OTHER'">支付方式：未支付</div>
+			</div>
+			
+			<div class="d-i">
+				<div>余额抵预付款：-${{orders.waitPayAmount-orders.amount}}</div>
+				<!-- 待付款-->
+				<template v-if="orders.state=='NEW'">
+					<div>待支付金额：${{orders.waitPayAmount}}</div>
+					<div>成团价：<span>待定</span></div>
+				</template>
+				<!-- 待成团 -->
+				<template v-if="orders.state=='WAIT'">
+					<div>已支付金额：${{orders.payAmount}}</div>
+					<div>成团价：<span>待定</span></div>
+				</template>
+				<!-- 未成团 -->
+				<template v-if="orders.state=='END'">
+					<div>已支付金额：${{orders.payAmount}}</div>
+					<div>成团价：<span>未成团</span></div>
+				</template>
+				<!-- 已成团 -->
+				<template v-if="orders.state=='SUCCESS'">
+					<div>已支付金额：${{orders.payAmount}}</div>
+					<div>成团人数：{{orders.subjectResultDto.buyNumber}}</div>
+					<div>成团价：${{orders.finishPrice}}</div>
+					<!-- <div>余额可抵扣尾款：$50</div>
+					<div>待支付剩余尾款：$1899</div> -->
+				</template>
+			</div>
+
+			<div class="d-i">
+				<div>姓名：{{orders.userDo.name}}</div>
+				<div>电话：{{orders.userDo.phone}}</div>
+				<div>微信：{{orders.userDo.username}}</div>
+				<div>邮箱：{{orders.userDo.email}}</div>
+				<div>顾问：<i v-if="orders.adviserDo.name">{{orders.adviserDo.name}}</i><i v-else>无</i></div>
+			</div>
+
+		</div>
+
+	</div>
+
+	
+
+	<div v-if="orders.state=='NEW'" class="order-detail-footer pay-footer" @click="pay">去支付</div>
+	<!-- <div v-else class="order-detail-footer share-footer">邀请好友拼团 / 分享</div> -->
+
+	<!-- 支付 -->
+	<div class="order-wrap" v-show="wrap"></div>
+	<div class="order-method" :class="classObj">
+		<div class="ck-title">请选择支付方式 <i class="iconfont" @click="closed">&#xe646;</i></div>
+		<div class="choice-method">
+			<div v-for="item in payMethods" class="method-item" :class="[$index+1==checkedMethod ? 'cur' : '']" @click="choiceMethod(item.id)">{{item.text}} <i class="iconfont" v-if="($index+1==checkedMethod)">&#xe656;</i></div>
+		</div>
+		<div class="pay-ok" @click="okPay">确定</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var id = haha.getQuery('id');
+		console.log(id);
+		var userInfo = sessionStorage.getItem("userInfo");
+		if(!id){
+			alert("订单编号不存在");
+			history.back();
+		}
+		var v = new Vue({
+			el:"#app",
+			data:{
+				courseID:0,
+				cityID:0,
+				orderID:id,
+				orders:null,
+				minPrice:0,
+				nowPrice:0,
+				payMethods:[
+					{
+						id:1,
+						text:'微信支付'
+					},
+					{
+						id:2,
+						text:'paypal支付'
+					},
+					{
+						id:3,
+						text:'信用卡或借记卡支付'
+					}
+				],
+				checkedMethod:1,
+				classObj:{
+					'bottom-to-top':false,
+					'top-to-bottom':false
+				},
+				wrap:false,
+				userMsg:userInfo ? JSON.parse(userInfo) : '',
+				isShowKefu:false,
+				isApp:sessionStorage.getItem("isApp"),
+				loading:true
+			},
+			created:function(){
+				this.getOrderDetail();
+				
+			},
+			filters:{
+				getOrderDay:function(num){
+					var d = new Date(num);
+					var od = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+' '+d.getHours()+':'+d.getMinutes()+':'+d.getSeconds();
+					return od;
+				}
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				getOrderDetail:function(){
+					var that = this;
+					axios.get(serveUrl+'/order/get',{
+						params:{
+							orderId:that.orderID
+						}
+					}).then(function(response){
+						that.orders = response.data.data;
+						that.courseID = that.orders.subjectId;
+						that.cityID = that.orders.regionDo.id;
+
+						that.getMinPrice();
+						that.getNowPrice();
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getMinPrice:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/minPrice',{
+						params:{ 
+							id:that.courseID,
+							regionId:that.cityID
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.minPrice = response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				getNowPrice:function(){
+					var that = this;
+					axios.get(serveUrl+'/subject/nowPrice',{
+						params:{ 
+							id:that.courseID,
+							regionId:that.cityID
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.nowPrice = response.data.data;
+						that.loading=false;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				goDetail:function(id){
+					location.href="detail.htm?cid="+id;
+				},
+				choiceMethod:function(id){
+					this.checkedMethod=id;
+				},
+				pay:function(){
+					this.wrap=true;
+					this.classObj={
+						'bottom-to-top':true,
+						'top-to-bottom':false
+					};
+				},
+				closed:function(){
+					this.wrap=false;
+					this.classObj={
+						'bottom-to-top':false,
+						'top-to-bottom':true
+					};
+				},
+				okPay:function(){
+					var that = this;
+					var payUrl = '';
+					sessionStorage.setItem("orderId",that.orderID);
+					var ua = navigator.userAgent.toLowerCase();
+					if(that.checkedMethod==1){ //微信支付
+						payUrl = '/royalPay/pay';
+					}else if(that.checkedMethod==2){ //payPal支付
+						payUrl = '/paypal/pay';
+						if(that.isApp){
+							window.webkit.messageHandlers.AppPaypal.postMessage(
+								{code: 1, msg: 'paypal支付', orderId: that.orderID}
+							)
+							return;
+						}
+					}else if(that.checkedMethod==3){
+						payUrl = '/paypal/pay';
+						if(that.isApp){
+							window.webkit.messageHandlers.AppCardPay.postMessage(
+								{code: 1, msg: '卡支付', orderId: that.orderID}
+							)
+							return;
+						}
+					}
+					axios.get(serveUrl+payUrl,{
+						params:{ 
+							orderId:that.orderID,
+							openId:that.userMsg.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						location.href=response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				}
+			}
+		})
+	</script>
+</body>
+</html>

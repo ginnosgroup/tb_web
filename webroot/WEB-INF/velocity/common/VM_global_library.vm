@@ -1,0 +1,12 @@
+## Select control using LabelValue objects (label property, value property)
+## $name The control name
+## $selected The selected value
+## $beans The collection of LabelValue beans
+#macro (selectList $name $list )
+  <select name="$name">
+  #foreach ($e in $list )
+  #set($v = $e.getValue() )
+  <option value="$v">$e.getLabel()</option>
+  #end
+  </select>
+#end

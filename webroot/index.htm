@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-微信授权登录</title>
+</head>
+<body>
+
+	<div id="app" v-cloak></div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+
+	<script>
+		
+		var v = new Vue({
+			el:'#app',
+			created:function(){
+				//是否是APP
+				var isApp = Boolean(haha.getQuery('isApp'));
+				if(isApp){
+					sessionStorage.setItem("isApp",'yes');
+					window.webkit.messageHandlers.AppLogin.postMessage({
+						code: 1, msg: 'APP登录'
+					})
+				}else{
+					this.login();
+				}
+			},
+			methods:{
+				login:function(){
+					var that = this;
+					var params = {};
+					if(sessionStorage.getItem('shareIn')){
+						params.url = 'bind.htm';
+						params.recommendOpenid = sessionStorage.getItem('popenId');
+					}else{
+						params.url = 'city.htm';
+					}
+					axios.get('/wxgz/thirdLogin',{
+						params:params
+					}).then(function(response){
+						window.location.href=response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				}
+			}
+		})
+
+
+
+
+	</script>
+</body>
+</html>

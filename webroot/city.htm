@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-选择城市</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+	<div class="city-header">
+		<span v-if="backBtn" @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>选择城市</h3>
+	</div>
+
+	<div class="city-main">
+		<div class="city-item" v-for="city in citys">
+			<div class="city-title">{{city.name}}</div>
+			<ul class="city-choice clearfix">
+				<li v-for="item in city.regionList" @click="choiceCity(item.id,item.name)" :class="[item.id==ckId ? 'active':'']">{{item.name}}</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="city-footer" @click="confirmCity">确定</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>	
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var openId = haha.getQuery('openId');		
+		var cid = sessionStorage.getItem('cityID');
+		var isCity = sessionStorage.getItem('isCity');
+
+		if(openId){
+			sessionStorage.setItem("openId",openId);
+		}else{
+			openId = sessionStorage.getItem("openId");
+		}
+
+		var v = new Vue({
+			el:'#app',
+			data:{
+				userMsg:null,
+				openId:openId,
+				citys:null,
+				ckId:cid ? cid : 9999,
+				ckName:'',
+				backBtn:isCity?true:false,
+				loading:true
+			},
+			created:function(){
+				this.getUserInfo();
+				this.getParentArea();
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				getParentArea:function(){
+					var that = this;
+					axios.get(serveUrl+'/region/all').then(function(response){
+						var res = response.data.data;
+						console.log(res);
+						that.citys = res;
+						that.loading=false;
+					}).catch(function(error){
+						alert(error);
+					});	
+				},
+				getUserInfo:function(){
+					var that = this;
+					axios.get(serveUrl+'/user/getUser',{
+						params:{
+							openId:that.openId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.userMsg = response.data.data;
+						sessionStorage.setItem("userInfo",JSON.stringify(that.userMsg));
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				choiceCity:function(id,name){
+					this.ckId=id;
+					this.ckName=name;
+				},
+				confirmCity:function(){
+					var that = this;
+					if(that.ckId==9999){
+						alert("请选择城市");
+					}else{
+						sessionStorage.setItem('cityID',that.ckId);
+						sessionStorage.setItem('ckName',that.ckName);
+						if(that.userMsg.phone){
+							if(that.userMsg.adviserId){
+								location.href="list.htm";
+							}else{
+								location.href="choose-adviser.htm";
+							}
+						}else{
+							location.href="bind.htm";
+						}
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>

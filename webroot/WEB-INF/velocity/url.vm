@@ -1,0 +1,8 @@
+$#if(!$url)
+  Error !
+#else
+  Please Wait ......
+  <script language="JavaScript" type="text/javascript">
+    window.location.href = '$!{url}';
+  </script>
+#end

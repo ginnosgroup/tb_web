@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+	<meta name="format-detection" content="telephone=no">
+	<title>指南针拼团-我的订单</title>
+	<link rel="stylesheet" href="css/group.css?verson=20171101">
+</head>
+<body>
+<div id="app" v-cloak>	
+	<div class="pay-header">
+		<span @click="goBack"><i class="iconfont">&#xe679;</i></span>
+		<h3>我的订单</h3>
+	</div>
+
+	<div class="order">
+		
+		<div class="order-list"  v-if="orders.length">
+			<div class="order-item" v-for="order in orders">
+				<div class="clearfix" >
+					<div v-if="order.state=='NEW'" class="order-state wait-pay">待支付</div>
+					<div v-if="order.state=='WAIT'" class="order-state ok2-pay">待成团</div>
+					<div v-if="order.state=='SUCCESS'" class="order-state ok-pay">已成团</div>
+					<div v-if="order.state=='END'" class="order-state cancel-pay">未成团</div>
+					<div class="order-msg">
+						<div class="order-name">{{order.subjectResultDto.name}}</div>
+						<div class="order-area">区域：{{order.regionDo.name}}</div>
+						<div v-if="order.state=='NEW'" class="order-price">待支付：${{order.waitPayAmount}}</div>
+						<div v-else class="order-price">已支付：${{order.waitPayAmount}}</div>
+					</div>
+				</div>
+				<div class="order-cz clearfix">
+					<div class="order-look" @click="orderDetail(order.id)">查看订单详情</div>
+					<div v-if="order.state=='NEW'" class="order-pay" @click="pay(order.id)">去支付</div>
+					<!-- <div v-else class="order-share">邀请好友参团 赚 $5</div> -->
+					
+				</div>
+			</div>
+		</div>
+		<div class="no-data" v-else>您暂时没有订单哦</div>
+	</div>
+
+	<!-- loading -->
+	<div v-if="loading" class="s-wrap fixed">
+		<div class="spinner">
+		  <div class="rect1"></div>
+		  <div class="rect2"></div>
+		  <div class="rect3"></div>
+		  <div class="rect4"></div>
+		  <div class="rect5"></div>
+		</div>
+	</div>
+
+	<!-- 支付 -->
+	<div class="order-wrap" v-show="wrap"></div>
+	<div class="order-method" :class="classObj">
+		<div class="ck-title">请选择支付方式 <i class="iconfont" @click="closed">&#xe646;</i></div>
+		<div class="choice-method">
+			<div v-for="item in payMethods" class="method-item" :class="[$index+1==checkedMethod ? 'cur' : '']" @click="choiceMethod(item.id)">{{item.text}} <i class="iconfont" v-if="($index+1==checkedMethod)">&#xe656;</i></div>
+		</div>
+		<div class="pay-ok" @click="okPay">确定</div>
+	</div>
+
+	<div class="back-home">
+		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+	</div>
+
+	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
+	<div class="chat-wrap" v-show="isShowKefu">
+		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
+		<div class="kf-img">
+			<img v-if="userInfo.adviserDto" :src="userInfo.adviserDto.imageUrl" alt="">
+			<img v-else src="img/kefu.jpg" alt="">
+			<p>长按图片识别二维码 即时对话</p>
+		</div>
+	</div>
+
+</div>
+
+	<script src="js/group.js?verson=20171026"></script>
+	<script src="js/vue.min.js"></script>
+	<script src="js/axios.min.js"></script>
+	<script>
+		haha.init(); //初始化字体大小
+		var userInfo = sessionStorage.getItem("userInfo");
+		var v = new Vue({
+			el:"#app",
+			data:{
+				userInfo:userInfo ? JSON.parse(userInfo) : '',
+				orders:null,
+				payMethods:[
+					{
+						id:1,
+						text:'微信支付'
+					},
+					{
+						id:2,
+						text:'paypal支付'
+					},
+					{
+						id:3,
+						text:'信用卡或借记卡支付'
+					}
+				],
+				checkedMethod:1,
+				classObj:{
+					'bottom-to-top':false,
+					'top-to-bottom':false
+				},
+				wrap:false,
+				orderID:0,
+				isShowKefu:false,
+				isApp:sessionStorage.getItem("isApp"),
+				loading:true
+			},
+			created:function(){
+				this.updateOrder();
+				this.getOrder();
+			},
+			methods:{
+				goBack:function(){
+					history.back();
+				},
+				showKefu:function(){
+					this.isShowKefu=true;
+				},
+				closeKefu:function(){
+					this.isShowKefu=false;
+				},
+				getOrder:function(){
+					var that = this;
+					axios.get(serveUrl+'/order/list',{
+						params:{
+							state:'ALL',
+							openId:that.userInfo.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+						that.orders = response.data.data;
+						that.loading=false;
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				updateOrder:function(){
+					var that = this;
+					axios.get(serveUrl+'/order/update',{
+						params:{
+							openId:that.userInfo.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						console.log(response.data.data);
+					}).catch(function(error){
+						alert(error);
+					})
+				},
+				orderDetail:function(id){
+					location.href="order-detail.htm?id="+id;
+				},
+				choiceMethod:function(id){
+					this.checkedMethod=id;
+				},
+				pay:function(id){
+					this.orderID = id;
+					this.wrap=true;
+					this.classObj={
+						'bottom-to-top':true,
+						'top-to-bottom':false
+					};
+				},
+				closed:function(){
+					this.wrap=false;
+					this.classObj={
+						'bottom-to-top':false,
+						'top-to-bottom':true
+					};
+				},
+				okPay:function(){
+					var that = this;
+					var payUrl = '';
+					sessionStorage.setItem("orderId",that.orderID);
+					var ua = navigator.userAgent.toLowerCase();
+					if(that.checkedMethod==1){ //微信支付
+						payUrl = '/royalPay/pay';
+					}else if(that.checkedMethod==2){ //payPal支付
+						payUrl = '/paypal/pay';
+						if(that.isApp){
+							if (/iphone|ipad|ipod/.test(ua)) {
+								window.webkit.messageHandlers.AppPaypal.postMessage(
+									{code: 1, msg: 'paypal支付', orderId: that.orderID}
+								)
+							}else if (/android/.test(ua)){
+								window.AppPaypal.postMessage(
+									JSON.stringify({code: 1, msg: 'paypal支付', orderId: that.orderID})
+								)
+							};
+							return;
+						}
+					}else if(that.checkedMethod==3){
+						payUrl = '/paypal/pay';
+						if(that.isApp){
+							if (/iphone|ipad|ipod/.test(ua)) {
+								window.webkit.messageHandlers.AppCardPay.postMessage(
+									{code: 1, msg: '卡支付', orderId: that.orderID}
+								)
+							}else if (/android/.test(ua)){
+								window.AppCardPay.postMessage(
+									JSON.stringify({code: 1, msg: '卡支付', orderId: that.orderID})
+								)
+							};
+							return;
+						}
+					}
+
+					axios.get(serveUrl+payUrl,{
+						params:{ 
+							orderId:that.orderID,
+							openId:that.userInfo.authOpenId,
+							thirdType:"WECHAT"
+						}
+					}).then(function(response){
+						location.href=response.data.data;
+					}).catch(function(error){
+						alert(error);
+					})
+				}
+			}
+		})
+	</script>	
+</body>
+</html>
