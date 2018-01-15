@@ -98,8 +98,7 @@
 		recommend_openid as recommendOpenid,
 		gmt_create as createDate
 		from tb_user
-		where id
-		=#{id}
+		where id=#{id} and auth_type!='BROKERAGE'
 	</select>
 	<select id="getUserByPhone" resultType="au.com.zhinanzhen.tb.dao.pojo.UserDO">
 		select
@@ -120,6 +119,6 @@
 		recommend_openid as recommendOpenid,
 		gmt_create as createDate
 		from tb_user
-		where phone = #{phone}
+		where phone = #{phone} and auth_type!='BROKERAGE'
 	</select>
 </mapper>
