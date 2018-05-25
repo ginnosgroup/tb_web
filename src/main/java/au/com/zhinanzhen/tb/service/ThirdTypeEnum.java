@@ -2,7 +2,7 @@ package au.com.zhinanzhen.tb.service;
 
 public enum ThirdTypeEnum {
 
-    WECHAT("微信"), FACEBOOK("facebook");
+    WECHAT("微信"), FACEBOOK("facebook"), V("虚拟用户");
 
     private String value;
 
