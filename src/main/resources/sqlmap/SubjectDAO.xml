@@ -5,6 +5,8 @@
 		select
 		m.id,
 		m.name,
+		m.type,
+		m.parent_id as parentId,
 		m.logo,
 		m.price,
 		m.start_date as startDate,
@@ -20,7 +22,7 @@
 		tb_subject_category n on 
 		m.category_id = n.id
 		WHERE
-		1 = 1
+		m.type != 'CHILD'
 		<if test="categoryId != 0">
 			AND m.category_id = #{categoryId}
 		</if>
@@ -54,6 +56,8 @@
 		select
 		m.id,
 		m.name,
+		m.type,
+		m.parent_id as parentId,
 		m.logo,
 		m.price,
 		m.start_date as startDate,

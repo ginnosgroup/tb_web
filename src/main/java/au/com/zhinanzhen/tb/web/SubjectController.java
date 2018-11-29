@@ -38,12 +38,14 @@ public class SubjectController extends AbstractController {
 
     @ResponseBody
     @RequestMapping("/getBycategoryId")
-    public JsonResult getCategoryList(int categoryId, int regionId, String classify) throws ServiceException {
-	if (categoryId < 0) {
+    public JsonResult getCategoryList(Integer categoryId, Integer regionId, String classify) throws ServiceException {
+    	if(categoryId == null) categoryId = 0;
+    	if(regionId == null) regionId = 0;
+	if (categoryId == null || categoryId < 0) {
 	    Exception e = new Exception("类目错误");
 	    return new JsonResult(2, e);
 	}
-	if (regionId < 0) {
+	if (regionId == null || regionId < 0) {
 	    Exception e = new Exception("区域错误");
 	    return new JsonResult(2, e);
 	}
