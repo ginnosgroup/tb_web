@@ -367,7 +367,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	int subjectId = order.getSubjectId();
 	SubjectResultDTO subjectResultDto = subjectService.getSubjectById(subjectId, regionId);
 	if (subjectResultDto == null) {
-	    ServiceException se = new ServiceException("subjectResultDto	 not found !");
+	    ServiceException se = new ServiceException("subjectResultDto not found !");
 	    se.setCode(ErrorCodeEnum.DATA_ERROR.code());
 	    throw se;
 	}

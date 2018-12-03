@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import au.com.zhinanzhen.tb.service.SubjectTypeEnum;
 import lombok.Data;
 
 @Data
@@ -12,6 +13,10 @@ public class SubjectResultDTO {
     private int id;
 
     private String name;
+    
+    private SubjectTypeEnum type;
+	
+	private int parentId;
     
     private String logo;
 

@@ -87,9 +87,12 @@
 				</div>
 
 				<div class="c-btn c-start clearfix" v-if="course.state=='START'">
-					<!-- <div class="c-share">邀请好友参团</div> -->
-					<div class="c-pay c-my-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+					<div class="c-pay c-my-pay" v-if="course.type=='INDIE'" @click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
+					<div class="c-pay c-my-pay" v-else @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
 				</div>
+				<!-- <div class="c-btn c-start clearfix" v-if="course.state=='START'">
+					<div class="c-pay c-my-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+				</div> -->
 				<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
 					<!-- <div class="c-share">邀请好友参团</div> -->
 					<div class="c-pay c-my-pay">待开团</div>
