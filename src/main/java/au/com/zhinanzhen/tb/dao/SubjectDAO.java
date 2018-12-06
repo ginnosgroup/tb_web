@@ -8,6 +8,9 @@ import au.com.zhinanzhen.tb.dao.pojo.SubjectDO;
 
 
 public interface SubjectDAO {
+	
+	int addSubject(SubjectDO subjectDo);
+	
     List<SubjectDO> selectSubjectByCategoryIdAndRegionId(
 	    @Param("categoryId") int categoryId,
 	    @Param("regionId") int regionId,

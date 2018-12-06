@@ -22,6 +22,7 @@ import au.com.zhinanzhen.tb.service.ServiceException;
 import au.com.zhinanzhen.tb.service.SubjectClassifyEnum;
 import au.com.zhinanzhen.tb.service.SubjectService;
 import au.com.zhinanzhen.tb.service.SubjectStateEnum;
+import au.com.zhinanzhen.tb.service.SubjectTypeEnum;
 import au.com.zhinanzhen.tb.service.pojo.SubjectPriceDTO;
 import au.com.zhinanzhen.tb.service.pojo.SubjectResultDTO;
 import au.com.zhinanzhen.tb.utils.ConfigService;
@@ -347,4 +348,16 @@ public class SubjectServiceImpl extends BaseService implements SubjectService {
 	}
 	return 0;
     }
+
+	@Override
+	public int newChildSubjectId(int pId) throws ServiceException {
+		SubjectDO subjectDo = subjectDAO.selectById(pId);
+		subjectDo.setId(-1);
+		if(SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
+			subjectDo.setType(SubjectTypeEnum.CHILD.name());
+			subjectDAO.addSubject(subjectDo);
+			return subjectDo.getId();
+		} else
+			return -1;
+	}
 }
