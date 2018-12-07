@@ -325,8 +325,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			subjectDo.setType(SubjectTypeEnum.CHILD.name());
 			subjectDo.setParentId(subjectDo.getId());
 			subjectDo.setId(-1);
-			subjectDAO.addSubject(subjectDo);
-			orderDo.setSubjectId(subjectDo.getId());
+			if (subjectDAO.addSubject(subjectDo) > 0)
+				orderDo.setSubjectId(subjectDo.getId());
+			else {
+				ServiceException se = new ServiceException("create indie subject fail !");
+				se.setCode(ErrorCodeEnum.EXECUTE_ERROR.code());
+				throw se;
+			}
 		}
 	
 	orderDo.setPayAmount(new BigDecimal(payMoney));
