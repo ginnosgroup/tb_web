@@ -64,6 +64,4 @@ public interface SubjectService {
     * @throws ServiceException
     */
    double getSubjectNextMoney(int subjectId,int regionId) throws ServiceException;
-   
-   int newChildSubjectId(int id) throws ServiceException;
 }

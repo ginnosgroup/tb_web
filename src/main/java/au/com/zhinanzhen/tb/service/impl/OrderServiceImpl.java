@@ -33,6 +33,7 @@ import au.com.zhinanzhen.tb.service.PayTypeEnum;
 import au.com.zhinanzhen.tb.service.ServiceException;
 import au.com.zhinanzhen.tb.service.SubjectService;
 import au.com.zhinanzhen.tb.service.SubjectStateEnum;
+import au.com.zhinanzhen.tb.service.SubjectTypeEnum;
 import au.com.zhinanzhen.tb.service.UserService;
 import au.com.zhinanzhen.tb.service.pojo.SubjectResultDTO;
 import au.com.zhinanzhen.tb.service.pojo.UserDTO;
@@ -318,6 +319,16 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		throw se;
 	    }
 	}
+	
+		// 如果是小团就新创建子团
+		if (SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
+			subjectDo.setType(SubjectTypeEnum.CHILD.name());
+			subjectDo.setParentId(subjectDo.getId());
+			subjectDo.setId(-1);
+			subjectDAO.addSubject(subjectDo);
+			orderDo.setSubjectId(subjectDo.getId());
+		}
+	
 	orderDo.setPayAmount(new BigDecimal(payMoney));
 	orderDo.setPayType(payType);
 	orderDo.setPayCode(payCode);

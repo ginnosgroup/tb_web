@@ -349,17 +349,4 @@ public class SubjectServiceImpl extends BaseService implements SubjectService {
 	return 0;
     }
 
-	@Override
-	public int newChildSubjectId(int pId) throws ServiceException {
-		SubjectDO subjectDo = subjectDAO.selectById(pId);
-		int parentId = subjectDo.getId();
-		subjectDo.setId(-1);
-		if(SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
-			subjectDo.setType(SubjectTypeEnum.CHILD.name());
-			subjectDo.setParentId(parentId);
-			subjectDAO.addSubject(subjectDo);
-			return subjectDo.getId();
-		} else
-			return -1;
-	}
 }
