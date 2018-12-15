@@ -22,7 +22,8 @@
 		<div class="go-detail" @click="orderDetail">查看订单</div>
 		<div class="qr-code"> 
 			<img :src="userMsg.adviserDto.imageUrl" alt="">
-			<p>您的专属顾问{{userMsg.adviserDto.name}}随时为您服务</p>
+			<p>您的专属顾问{{userMsg.adviserDto.name}}随时为您服务(咨询电话:<a href="tel:{{userMsg.adviserDto.phone}}">{{userMsg.adviserDto.phone}}</a>)</p>
+			<p>咨询电话:<a href="tel:{{userMsg.adviserDto.phone}}">{{userMsg.adviserDto.phone}}</a></p>
 		</div>
 	</div>
 
