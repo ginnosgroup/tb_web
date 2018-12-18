@@ -36,5 +36,7 @@ public class SubjectDO {
     private String details;
 
     private String regionIds;
+    
+    private int weight;
 
 }

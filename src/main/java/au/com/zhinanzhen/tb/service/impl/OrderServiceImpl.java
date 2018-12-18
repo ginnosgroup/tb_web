@@ -149,7 +149,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	    OrderDO orderDo = new OrderDO();
 	    orderDo.setName(name);
 	    orderDo.setState(OrderStateEnum.NEW.toString());
-	    orderDo.setSubjectId(subjectId);
+	    int childSubjectId = addChildSubject(subjectDo);
+	    orderDo.setSubjectId(childSubjectId > 0 ? childSubjectId : subjectId);
 	    orderDo.setNum(num);
 	    orderDo.setPayType(PayTypeEnum.OTHER.toString());
 	    orderDo.setUserId(userId);
@@ -170,7 +171,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	    OrderDO orderDo = new OrderDO();
 	    orderDo.setName(name);
 	    orderDo.setState(OrderStateEnum.WAIT.toString());
-	    orderDo.setSubjectId(subjectId);
+	    int childSubjectId = addChildSubject(subjectDo);
+	    orderDo.setSubjectId(childSubjectId > 0 ? childSubjectId : subjectId);
 	    orderDo.setNum(num);
 	    orderDo.setAmount(new BigDecimal(0));
 	    orderDo.setPayType(PayTypeEnum.BALANCE.toString());
@@ -319,20 +321,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		throw se;
 	    }
 	}
-	
-		// 如果是小团就新创建子团
-		if (SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
-			subjectDo.setType(SubjectTypeEnum.CHILD.name());
-			subjectDo.setParentId(subjectDo.getId());
-			subjectDo.setId(-1);
-			if (subjectDAO.addSubject(subjectDo) > 0)
-				orderDo.setSubjectId(subjectDo.getId());
-			else {
-				ServiceException se = new ServiceException("create indie subject fail !");
-				se.setCode(ErrorCodeEnum.EXECUTE_ERROR.code());
-				throw se;
-			}
-		}
 	
 	orderDo.setPayAmount(new BigDecimal(payMoney));
 	orderDo.setPayType(payType);
@@ -698,4 +686,23 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 	return orderResultList;
     }
+    
+	private int addChildSubject(SubjectDO subjectDo) throws ServiceException {
+		// 如果是小团就新创建子团
+		if (SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
+			subjectDo.setType(SubjectTypeEnum.CHILD.name());
+			subjectDo.setParentId(subjectDo.getId());
+			subjectDo.setId(-1);
+			subjectDo.setWeight(1);
+			if (subjectDAO.addSubject(subjectDo) > 0)
+				return subjectDo.getId();
+			// orderDo.setSubjectId(subjectDo.getId());
+			else {
+				ServiceException se = new ServiceException("create indie subject fail !");
+				se.setCode(ErrorCodeEnum.EXECUTE_ERROR.code());
+				throw se;
+			}
+		}
+		return 0;
+	}
 }
