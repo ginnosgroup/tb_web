@@ -25,6 +25,7 @@ import au.com.zhinanzhen.tb.dao.pojo.PayLogDO;
 import au.com.zhinanzhen.tb.service.pojo.OrderResultDTO;
 import au.com.zhinanzhen.tb.dao.pojo.RegionDO;
 import au.com.zhinanzhen.tb.dao.pojo.SubjectDO;
+import au.com.zhinanzhen.tb.dao.pojo.SubjectPriceDO;
 import au.com.zhinanzhen.tb.dao.pojo.UserDO;
 import au.com.zhinanzhen.tb.service.AdviserService;
 import au.com.zhinanzhen.tb.service.OrderService;
@@ -690,14 +691,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	private int addChildSubject(SubjectDO subjectDo) throws ServiceException {
 		// 如果是小团就新创建子团
 		if (SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
+			int subjectId = subjectDo.getId();
 			subjectDo.setType(SubjectTypeEnum.CHILD.name());
-			subjectDo.setParentId(subjectDo.getId());
+			subjectDo.setParentId(subjectId);
 			subjectDo.setId(-1);
 			subjectDo.setWeight(1);
-			if (subjectDAO.addSubject(subjectDo) > 0)
+			if (subjectDAO.addSubject(subjectDo) > 0) {
+				List<SubjectPriceDO> subjectPriceDoList = subjectPriceDAO.selectBySubjectId(subjectId, 0);
+				subjectPriceDoList.forEach(spDo -> {
+					spDo.setSubjectId(subjectDo.getId());
+					subjectPriceDAO.insert(spDo);
+				});
 				return subjectDo.getId();
-			// orderDo.setSubjectId(subjectDo.getId());
-			else {
+			} else {
 				ServiceException se = new ServiceException("create indie subject fail !");
 				se.setCode(ErrorCodeEnum.EXECUTE_ERROR.code());
 				throw se;
