@@ -10,8 +10,6 @@ import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
-import com.esotericsoftware.minlog.Log;
 import com.ikasoa.core.thrift.ErrorCodeEnum;
 import com.ikasoa.core.utils.StringUtil;
 import au.com.zhinanzhen.tb.dao.pojo.AdviserDO;
@@ -152,11 +150,9 @@ public abstract class BaseService {
 	    throw se;
 	}
 	if (AdviserStateEnum.DISABLED.toString().equals(adviserDo.getState())) {
-//	    ServiceException se = new ServiceException("顾问被禁用！");
-//	    se.setCode(ErrorCodeEnum.DATA_ERROR.code());
-//	    throw se;
-		Log.warn("顾问被禁用！无法发送邮件！");
-		return false;
+	    ServiceException se = new ServiceException("顾问被禁用！");
+	    se.setCode(ErrorCodeEnum.DATA_ERROR.code());
+	    throw se;
 	}
 	return MailUtil.sendMail(adviserDo.getEmail(), getPayFinishMailSubject(orderDto, userDto),
 		getPayFinishMailContent(orderDto, userDto));
