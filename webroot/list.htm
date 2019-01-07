@@ -7,8 +7,6 @@
 	<title>指南针拼团-拼团列表</title>
 	<link rel="stylesheet" href="css/swiper.min.css">
 	<link rel="stylesheet" href="css/group.css?verson=20171101">
-        <script type='text/javascript' src='http://cdn.staticfile.org/jquery/2.1.1/jquery.min.js'></script>
-        <script type="text/javascript" src="http://cdn.staticfile.org/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
 </head>
 <body>
 
@@ -21,8 +19,6 @@
 		<h3>指南针拼团</h3>
 		<div class="face" @click="showMy"><img :src="userMsg.logo" alt=""></div>
 	</header>
-
-<div id="share-qrcode"></div>
 
 	<div class="nav-wrap">
 		<nav :class="{'fixed-nav' : isFixed}">
@@ -91,13 +87,9 @@
 				</div>
 
 				<div class="c-btn c-start clearfix" v-if="course.state=='START'">
-                                        <div class="c-share" @click="share('detail.htm?cid='+course.id)">分享</div>
-					<div class="c-pay" v-if="course.type=='INDIE'" @click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
-					<div class="c-pay" v-else @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
-				</div>
-				<!-- <div class="c-btn c-start clearfix" v-if="course.state=='START'">
+					<!-- <div class="c-share">邀请好友参团</div> -->
 					<div class="c-pay c-my-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
-				</div> -->
+				</div>
 				<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
 					<!-- <div class="c-share">邀请好友参团</div> -->
 					<div class="c-pay c-my-pay">待开团</div>
@@ -223,13 +215,11 @@
     				observeParents:true,//修改swiper的父元素时，自动初始化swiper
 				});
 				this.swp = mySwiper;
-
 				//banner
 				var mySwiper = new Swiper ('#nav', {
 					loop: true,
 					pagination: '.swiper-pagination'
 				})        
-
 				//
 				var that = this;
 				window.addEventListener('scroll', function(){
@@ -265,14 +255,12 @@
 			},
 			methods:{
 				mySwiper:function(){
-
 					var swiper = this.swp;
 					this.clickIndex = swiper.clickedIndex;
 					sessionStorage.setItem('ckIndex',this.clickIndex);
 					var swiperWidth = swiper.container[0].clientWidth; //可以通过mySwiper.container[0]得到container的HTML元素
 					var maxTranslate = swiper.maxTranslate(); //最大左移距离
 					var maxWidth = -maxTranslate + swiperWidth / 2;
-
 					var slide = swiper.slides[swiper.clickedIndex];  //通过mySwiper.slides[1]获取特定的slide
 					var slideLeft = slide.offsetLeft; //slide离左边宽度
 					var slideWidth = slide.clientWidth; //slide宽度
@@ -436,21 +424,9 @@
 				},
 				enterDetail:function(id){
 					location.href="detail.htm?cid="+id;
-				},
-				share:function(url){
-alert("https://tuangou.51mantuo.com/" + url);
-					$("#share-qrcode").empty();
-					$("#share-qrcode").qrcode({ 
-						render: "table",
-						width: 200,
-						height:200,
-						text: "https://tuangou.51mantuo.com/" + url
-					});
 				}
 			}
 		})
-
-
 	</script>
 </body>
 </html>
