@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
@@ -7,8 +8,8 @@
 	<title>指南针拼团-拼团列表</title>
 	<link rel="stylesheet" href="css/swiper.min.css">
 	<link rel="stylesheet" href="css/group.css?verson=20171101">
-        <script type='text/javascript' src='http://cdn.staticfile.org/jquery/2.1.1/jquery.min.js'></script>
-        <script type="text/javascript" src="http://cdn.staticfile.org/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+        <script type='text/javascript' src='https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js'></script>
+        <script type="text/javascript" src="https://cdn.staticfile.org/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
 </head>
 <body>
 
@@ -22,7 +23,7 @@
 		<div class="face" @click="showMy"><img :src="userMsg.logo" alt=""></div>
 	</header>
 
-<div id="share-qrcode"></div>
+	<div id="share-qrcode" style="margin:auto;position:absolute;z-index:3;top:50%;left:50%;-ms-transform:translate(-50%,-50%);-moz-transform:translate(-50%,-50%);-o-transform:translate(-50%,-50%);transform:translate(-50%,-50%)" onclick="javascript:this.innerHTML=''"></div>
 
 	<div class="nav-wrap">
 		<nav :class="{'fixed-nav' : isFixed}">
@@ -91,17 +92,19 @@
 				</div>
 
 				<div class="c-btn c-start clearfix" v-if="course.state=='START'">
-                                        <div class="c-share" v-if="course.type!='DEFAULT'" @click="share('detail.htm?cid='+course.id)">分享</div>
-					<div class="c-pay" v-if="course.type=='INDIE'" @click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
-					<div class="c-pay" v-else-if="course.type=='CHILD'" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
-					<div class="c-pay c-my-pay" v-else @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+                                        <div class="c-share" v-show="course.type!='DEFAULT'" @click="share('detail.htm?cid='+course.id)">二维码分享</div>
+					<div class="c-pay" v-show="course.type=='INDIE'" @click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
+					<div class="c-pay" v-show="course.type=='CHILD'" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+					<div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
 				</div>
 				<!-- <div class="c-btn c-start clearfix" v-if="course.state=='START'">
 					<div class="c-pay c-my-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
 				</div> -->
 				<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
 					<!-- <div class="c-share">邀请好友参团</div> -->
-					<div class="c-pay c-my-pay">待开团</div>
+                                        <div class="c-share" v-show="course.type!='DEFAULT'" @click="share('detail.htm?cid='+course.id)">二维码分享</div>
+					<div class="c-pay" v-show="course.type!='DEFAULT'">待开团</div>
+                                        <div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'">待开团</div>
 				</div>
 				<div class="c-btn c-end" v-if="course.state=='END'">
 					<div class="c-over">该团已结束</div>
@@ -439,7 +442,6 @@
 					location.href="detail.htm?cid="+id;
 				},
 				share:function(url){
-alert("https://tuangou.51mantuo.com/" + url);
 					$("#share-qrcode").empty();
 					$("#share-qrcode").qrcode({ 
 						render: "table",
