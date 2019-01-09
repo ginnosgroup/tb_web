@@ -84,14 +84,11 @@ public class SubjectServiceImpl extends BaseService implements SubjectService {
 			String regionIds = subjectPriceDto.getRegionIds();
 			String[] regionStrs = regionIds.split(",");
 			for (String str : regionStrs) {
-			    if (Integer.valueOf(str.split(":")[0]) == regionId) {
-			    	if(str.split(":").length==2) {
-			    		double price = Double.valueOf(str.split(":")[1]);
-						subjectPriceDto.setPrice(price);
-			    	} else
-			    		Log.error("Error region price : {}", str);
-				
-			    }
+			    if (Integer.valueOf(str.split(":")[0]) == regionId && str.split(":").length == 2) {
+			    	double price = Double.valueOf(str.split(":")[1]);
+					subjectPriceDto.setPrice(price);
+			    } else
+		    		Log.error("Error region price : {}", str);
 			}
 			subjectResultDto.getSubjectPriceDtolist().add(subjectPriceDto);
 		    }
