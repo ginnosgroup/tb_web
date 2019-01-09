@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.esotericsoftware.minlog.Log;
 import com.ikasoa.core.thrift.ErrorCodeEnum;
 import com.ikasoa.core.utils.StringUtil;
 
@@ -84,8 +85,12 @@ public class SubjectServiceImpl extends BaseService implements SubjectService {
 			String[] regionStrs = regionIds.split(",");
 			for (String str : regionStrs) {
 			    if (Integer.valueOf(str.split(":")[0]) == regionId) {
-				double price = Double.valueOf(str.split(":")[1]);
-				subjectPriceDto.setPrice(price);
+			    	if(str.split(":").length==2) {
+			    		double price = Double.valueOf(str.split(":")[1]);
+						subjectPriceDto.setPrice(price);
+			    	} else
+			    		Log.error("Error region price : {}", str);
+				
 			    }
 			}
 			subjectResultDto.getSubjectPriceDtolist().add(subjectPriceDto);
