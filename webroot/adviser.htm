@@ -19,7 +19,7 @@
 			<img :src="userMsg.adviserDto.imageUrl" alt="">
 			<p>{{userMsg.adviserDto.name}}</p>
 		</div>
-		<div class="qr-tips">长按图片扫码，即刻对话</div>
+		<div class="qr-tips">长按图片扫码，即刻对话<br />(或拨打咨询电话:<a href="tel:{{userMsg.adviserDto.phone}}">{{userMsg.adviserDto.phone}}</a>)</div>
 	</div>
 	<div v-else class="no-adviser">还没有顾问</div>
 

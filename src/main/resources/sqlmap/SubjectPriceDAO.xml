@@ -18,9 +18,9 @@
 			order="BEFORE">
 			SELECT LAST_INSERT_ID()
 		</selectKey>
-		insert into tb_subject_price_interval (id, subject_id, start_num,
+		insert into tb_subject_price_interval (id, gmt_create, gmt_modify, subject_id, start_num,
 		end_num, region_ids)
-		values (#{id,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER},
+		values (#{id,jdbcType=INTEGER}, now(), now(), #{subjectId,jdbcType=INTEGER},
 		#{startNum,jdbcType=INTEGER},
 		#{endNum,jdbcType=INTEGER}, #{regionIds,jdbcType=VARCHAR})
 	</insert>

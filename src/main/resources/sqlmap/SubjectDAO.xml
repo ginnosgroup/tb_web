@@ -1,10 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="au.com.zhinanzhen.tb.dao.SubjectDAO">
+
+    <insert id="addSubject" parameterType="au.com.zhinanzhen.tb.dao.pojo.SubjectDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT
+            INTO tb_subject (
+                gmt_create,
+                gmt_modify,
+                name,
+                type,
+                parent_id,
+                logo,
+                price,
+                start_date,
+                end_date,
+                state,
+                category_id,
+                pre_amount,
+                codex,
+                details,
+                region_ids,
+                weight)
+            VALUES (
+                now(),
+                now(),
+                #{name},
+                #{type},
+                #{parentId},
+                #{logo},
+                #{price},
+                #{startDate},
+                #{endDate},
+                'WAIT',
+                #{categoryId},
+                #{preAmount},
+                #{codex},
+                #{details},
+                #{regionIds},
+                #{weight});
+    </insert>
+
 	<select id="selectSubjectByCategoryIdAndRegionId" resultType="au.com.zhinanzhen.tb.dao.pojo.SubjectDO">
 		select
 		m.id,
 		m.name,
+		m.type,
+		m.parent_id as parentId,
 		m.logo,
 		m.price,
 		m.start_date as startDate,
@@ -19,8 +60,7 @@
 		from tb_subject m left join 
 		tb_subject_category n on 
 		m.category_id = n.id
-		WHERE
-		1 = 1
+		WHERE 1=1
 		<if test="categoryId != 0">
 			AND m.category_id = #{categoryId}
 		</if>
@@ -54,6 +94,8 @@
 		select
 		m.id,
 		m.name,
+		m.type,
+		m.parent_id as parentId,
 		m.logo,
 		m.price,
 		m.start_date as startDate,

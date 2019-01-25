@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.esotericsoftware.minlog.Log;
 import com.ikasoa.core.thrift.ErrorCodeEnum;
 import com.ikasoa.core.utils.StringUtil;
 
@@ -22,6 +23,7 @@ import au.com.zhinanzhen.tb.service.ServiceException;
 import au.com.zhinanzhen.tb.service.SubjectClassifyEnum;
 import au.com.zhinanzhen.tb.service.SubjectService;
 import au.com.zhinanzhen.tb.service.SubjectStateEnum;
+import au.com.zhinanzhen.tb.service.SubjectTypeEnum;
 import au.com.zhinanzhen.tb.service.pojo.SubjectPriceDTO;
 import au.com.zhinanzhen.tb.service.pojo.SubjectResultDTO;
 import au.com.zhinanzhen.tb.utils.ConfigService;
@@ -82,10 +84,11 @@ public class SubjectServiceImpl extends BaseService implements SubjectService {
 			String regionIds = subjectPriceDto.getRegionIds();
 			String[] regionStrs = regionIds.split(",");
 			for (String str : regionStrs) {
-			    if (Integer.valueOf(str.split(":")[0]) == regionId) {
-				double price = Double.valueOf(str.split(":")[1]);
-				subjectPriceDto.setPrice(price);
-			    }
+			    if (Integer.valueOf(str.split(":")[0]) == regionId && str.split(":").length == 2) {
+			    	double price = Double.valueOf(str.split(":")[1]);
+					subjectPriceDto.setPrice(price);
+			    } else
+		    		Log.error("Error region price : {}", str);
 			}
 			subjectResultDto.getSubjectPriceDtolist().add(subjectPriceDto);
 		    }
@@ -347,4 +350,5 @@ public class SubjectServiceImpl extends BaseService implements SubjectService {
 	}
 	return 0;
     }
+
 }

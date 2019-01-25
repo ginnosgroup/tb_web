@@ -31,7 +31,7 @@
 		<div class="kf-img">
 			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
 			<img v-else src="img/kefu.jpg" alt="">
-			<p>长按图片识别二维码 即时对话</p>
+			<p>长按图片识别二维码 即时对话 (或拨打咨询电话:<a href="tel:{{userMsg.adviserDto.phone}}">{{userMsg.adviserDto.phone}}</a>)</p>
 		</div>
 	</div>
 

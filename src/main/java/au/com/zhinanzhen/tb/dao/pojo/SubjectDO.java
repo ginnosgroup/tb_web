@@ -11,6 +11,10 @@ public class SubjectDO {
 
     private String name;
     
+    private String type;
+    
+    private int parentId;
+    
     private String logo;
 
     private double price;
@@ -32,5 +36,7 @@ public class SubjectDO {
     private String details;
 
     private String regionIds;
+    
+    private int weight;
 
 }

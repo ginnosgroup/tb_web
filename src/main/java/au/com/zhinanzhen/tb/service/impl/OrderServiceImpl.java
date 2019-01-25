@@ -25,6 +25,7 @@ import au.com.zhinanzhen.tb.dao.pojo.PayLogDO;
 import au.com.zhinanzhen.tb.service.pojo.OrderResultDTO;
 import au.com.zhinanzhen.tb.dao.pojo.RegionDO;
 import au.com.zhinanzhen.tb.dao.pojo.SubjectDO;
+import au.com.zhinanzhen.tb.dao.pojo.SubjectPriceDO;
 import au.com.zhinanzhen.tb.dao.pojo.UserDO;
 import au.com.zhinanzhen.tb.service.AdviserService;
 import au.com.zhinanzhen.tb.service.OrderService;
@@ -33,6 +34,7 @@ import au.com.zhinanzhen.tb.service.PayTypeEnum;
 import au.com.zhinanzhen.tb.service.ServiceException;
 import au.com.zhinanzhen.tb.service.SubjectService;
 import au.com.zhinanzhen.tb.service.SubjectStateEnum;
+import au.com.zhinanzhen.tb.service.SubjectTypeEnum;
 import au.com.zhinanzhen.tb.service.UserService;
 import au.com.zhinanzhen.tb.service.pojo.SubjectResultDTO;
 import au.com.zhinanzhen.tb.service.pojo.UserDTO;
@@ -148,7 +150,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	    OrderDO orderDo = new OrderDO();
 	    orderDo.setName(name);
 	    orderDo.setState(OrderStateEnum.NEW.toString());
-	    orderDo.setSubjectId(subjectId);
+	    int childSubjectId = addChildSubject(subjectDo);
+	    orderDo.setSubjectId(childSubjectId > 0 ? childSubjectId : subjectId);
 	    orderDo.setNum(num);
 	    orderDo.setPayType(PayTypeEnum.OTHER.toString());
 	    orderDo.setUserId(userId);
@@ -169,7 +172,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	    OrderDO orderDo = new OrderDO();
 	    orderDo.setName(name);
 	    orderDo.setState(OrderStateEnum.WAIT.toString());
-	    orderDo.setSubjectId(subjectId);
+	    int childSubjectId = addChildSubject(subjectDo);
+	    orderDo.setSubjectId(childSubjectId > 0 ? childSubjectId : subjectId);
 	    orderDo.setNum(num);
 	    orderDo.setAmount(new BigDecimal(0));
 	    orderDo.setPayType(PayTypeEnum.BALANCE.toString());
@@ -318,6 +322,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		throw se;
 	    }
 	}
+	
 	orderDo.setPayAmount(new BigDecimal(payMoney));
 	orderDo.setPayType(payType);
 	orderDo.setPayCode(payCode);
@@ -367,7 +372,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	int subjectId = order.getSubjectId();
 	SubjectResultDTO subjectResultDto = subjectService.getSubjectById(subjectId, regionId);
 	if (subjectResultDto == null) {
-	    ServiceException se = new ServiceException("subjectResultDto	 not found !");
+	    ServiceException se = new ServiceException("subjectResultDto not found !");
 	    se.setCode(ErrorCodeEnum.DATA_ERROR.code());
 	    throw se;
 	}
@@ -682,4 +687,28 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 	return orderResultList;
     }
+    
+	private int addChildSubject(SubjectDO subjectDo) throws ServiceException {
+		// 如果是小团就新创建子团
+		if (SubjectTypeEnum.INDIE.name().equalsIgnoreCase(subjectDo.getType())) {
+			int subjectId = subjectDo.getId();
+			subjectDo.setType(SubjectTypeEnum.CHILD.name());
+			subjectDo.setParentId(subjectId);
+			subjectDo.setId(-1);
+			subjectDo.setWeight(1);
+			if (subjectDAO.addSubject(subjectDo) > 0) {
+				List<SubjectPriceDO> subjectPriceDoList = subjectPriceDAO.selectBySubjectId(subjectId, 0);
+				subjectPriceDoList.forEach(spDo -> {
+					spDo.setSubjectId(subjectDo.getId());
+					subjectPriceDAO.insert(spDo);
+				});
+				return subjectDo.getId();
+			} else {
+				ServiceException se = new ServiceException("create indie subject fail !");
+				se.setCode(ErrorCodeEnum.EXECUTE_ERROR.code());
+				throw se;
+			}
+		}
+		return 0;
+	}
 }
