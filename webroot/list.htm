@@ -446,8 +446,8 @@
 					location.href="detail.htm?cid="+id;
 				},
 				share:function(name, url){
-					var that = this;
-					var url = httpsUrl + url + '&popenId='+that.userInfo.authOpenId+'&regionId='+that.cityID+'&cityName='+encodeURIComponent(that.cityName);
+					var userInfo = JSON.parse(uMsg);
+                                        var url = httpsUrl + 'detail.htm?regionId=' + cid + '&cid=' + id + '&popenId=' + userInfo.authOpenId + '&cityName=' + cName.replace(/(^\s*)|(\s*$)/g, "");
 					document.getElementById('share').style.display = '';
 					document.getElementById('share-text').style.display = '';
 					document.getElementById('app').style.display = 'none';
