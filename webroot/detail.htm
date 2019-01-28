@@ -31,7 +31,46 @@
 						<h5>拼团规则：</h5>
 						<div class="rule-content" v-html="course.codex"></div>
 					</div>
-					<div class="c-time">
+<template v-if="course.state=='START'">
+  <div class="c-time">
+    <table cellspacing="0" width="125px" height="65px" style="border-radius: 0px 0px 6px 6px;border:1px solid #F00;">
+      <tr height="20px">
+        <td align="center" bgcolor="#F00"><font color="#FFF">距结束</font></td>
+        <td align="center" style="border-bottom:1px solid #F00;"><span>{{course.endDate | getGroupDay}}</span>天<span>{{course.endDate | getGroupHour}}</span>时<span>{{course.endDate | getGroupMinu}}</span>分</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
+      </tr>
+    </table>
+  </div>
+</template>
+<template v-if="course.state=='WAIT'">
+  <div class="c-time">
+    <table cellspacing="0" width="125px" height="65px" style="border-radius: 0px 0px 6px 6px;border:1px solid #008000;">
+      <tr height="20px">
+        <td align="center" bgcolor="#008000"><font color="#FFF">距开团</font></td>
+        <td align="center" style="border-bottom:1px solid #008000;"><span>{{course.startDate | getGroupDay}}</span>天<span>{{course.startDate | getGroupHour}}</span>时<span>{{course.startDate | getGroupMinu}}</span>分</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
+      </tr>
+    </table>
+  </div>
+</template>
+<template v-if="course.state=='END'">
+  <div class="c-time">
+    <table cellspacing="0" width="125px" height="65px" style="border-radius: 0px 0px 6px 6px;border:1px solid #999;">
+      <tr height="20px">
+        <td align="center" bgcolor="#999"><font color="#FFF">已结束</font></td>
+        <td align="center" style="border-bottom:1px solid #999;"><span>0</span>天<span>0</span>时<span>0</span>分</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
+      </tr>
+    </table>
+  </div>
+</template>
+					<!--<div class="c-time">
 						<template v-if="course.state=='END' ">
 							<div class="c-t-t">该团已结束：</div>
 							<div class="c-t-m"><span>0</span>天<span>0</span>时<span>0</span>分</div>
@@ -44,7 +83,7 @@
 							<div class="c-t-t">距离结束还有：</div>
 							<div class="c-t-m"><span>{{course.endDate | getGroupDay}}</span>天<span>{{course.endDate | getGroupHour}}</span>时<span>{{course.endDate | getGroupMinu}}</span>分</div>
 						</template>
-					</div>
+					</div>-->
 				</div>
 
 				<div class="progress-bar">
