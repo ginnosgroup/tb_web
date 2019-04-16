@@ -13,14 +13,10 @@
 		delete from tb_subject_price_interval
 		where id = #{id,jdbcType=INTEGER}
 	</delete>
-	<insert id="insert" parameterType="au.com.zhinanzhen.tb.dao.pojo.SubjectPriceDO">
-		<selectKey resultType="java.lang.Integer" keyProperty="id"
-			order="BEFORE">
-			SELECT LAST_INSERT_ID()
-		</selectKey>
-		insert into tb_subject_price_interval (id, gmt_create, gmt_modify, subject_id, start_num,
+	<insert id="insert" parameterType="au.com.zhinanzhen.tb.dao.pojo.SubjectPriceDO" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_subject_price_interval (gmt_create, gmt_modify, subject_id, start_num,
 		end_num, region_ids)
-		values (#{id,jdbcType=INTEGER}, now(), now(), #{subjectId,jdbcType=INTEGER},
+		values (now(), now(), #{subjectId,jdbcType=INTEGER},
 		#{startNum,jdbcType=INTEGER},
 		#{endNum,jdbcType=INTEGER}, #{regionIds,jdbcType=VARCHAR})
 	</insert>

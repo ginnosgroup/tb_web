@@ -2,109 +2,138 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
-	<meta name="format-detection" content="telephone=no">
-	<title>指南针拼团-拼团列表</title>
-	<link rel="stylesheet" href="css/swiper.min.css">
-	<link rel="stylesheet" href="css/group.css?verson=20171101">
-	<script type='text/javascript' src='https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js'></script>
-	<script type="text/javascript" src="https://cdn.staticfile.org/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>指南针拼团-拼团列表</title>
+<link rel="stylesheet" href="css/swiper.min.css">
+<link rel="stylesheet" href="css/group.css?verson=20171101">
+<script type='text/javascript'
+	src='https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js'></script>
+<script type="text/javascript"
+	src="https://cdn.staticfile.org/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
 </head>
 <body>
 
-<div id="share" style="margin:auto;position:fixed;z-index:3;top:50%;left:50%;-ms-transform:translate(-50%,-50%);-moz-transform:translate(-50%,-50%);-o-transform:translate(-50%,-50%);transform:translate(-50%,-50%)" onclick="javascript:document.getElementById('share-qrcode').innerHTML='';document.getElementById('app').style.display='';document.getElementById('share-text').style.display='none';this.style.display='none'">
-	<div id="share-url"></div>
-	<div id="share-qrcode" align="center"></div>
-	<div id="share-text" align="center" style="background:#AAA;font-size:16px;display:none" onclick="javascript:copyShareUrl();document.getElementById('share-qrcode').innerHTML='';document.getElementById('app').style.display='';document.getElementById('share').style.display='none';this.style.display='none'">截屏保存二维码,点击此处复制课程内容.</div>
-</div>
+	<div id="share"
+		style="margin: auto; position: fixed; z-index: 3; top: 50%; left: 50%; -ms-transform: translate(-50%, -50%); -moz-transform: translate(-50%, -50%); -o-transform: translate(-50%, -50%); transform: translate(-50%, -50%)"
+		onclick="javascript:document.getElementById('share-qrcode').innerHTML='';document.getElementById('app').style.display='';document.getElementById('share-text').style.display='none';this.style.display='none'">
+		<div id="share-url"></div>
+		<div id="share-qrcode" align="center"></div>
+		<div id="share-text" align="center"
+			style="background: #AAA; font-size: 16px; display: none"
+			onclick="javascript:copyShareUrl();document.getElementById('share-qrcode').innerHTML='';document.getElementById('app').style.display='';document.getElementById('share').style.display='none';this.style.display='none'">截屏保存二维码,点击此处复制课程内容.</div>
+	</div>
 
-<div id="app" v-cloak">
+	<div id="app"v-cloak">
 
-	<header>
-		<div class="zone" @click="goCity">{{cName}} <i class="iconfont">&#xe661;</i></div>
-		<h3>指南针拼团</h3>
-		<div class="face" @click="showMy"><img :src="userMsg.logo" alt=""></div>
-	</header>
-
-	
-
-	<div class="nav-wrap">
-		<nav :class="{'fixed-nav' : isFixed}">
-			<div id="topNav" class="swiper-container" @click="mySwiper">
-				<div class="swiper-wrapper">
-					<div v-for="item in nav"  class="swiper-slide" :class="[$index==clickIndex ? 'active' : '']" @click="ckNav(item.id)"><span>{{item.name}}</span></div>
-				</div>
+		<header>
+			<div class="zone" @click="goCity">
+				{{cName}} <i class="iconfont">&#xe661;</i>
 			</div>
-		</nav>
-	</div>
+			<h3>指南针拼团</h3>
+			<div class="face" @click="showMy">
+				<img :src="userMsg.logo" alt="">
+			</div>
+		</header>
 
-	<div v-if="banner" class="banner" v-show="clickIndex==0">
-		<div id="nav" class="swiper-container">
-		    <div class="swiper-wrapper">
-		        <div v-for="item in banner" class="swiper-slide"><img :src="item.imgSrc" alt=""></div>
-		    </div>
-		    <!-- 如果需要分页器 -->
-		    <div class="swiper-pagination"></div>
-		</div>	
-	</div>
 
-	<div class="course">
-		<template v-if="courses.length">
-			<div  class="c-item" v-for="course in courses" >
+
+		<div class="nav-wrap">
+			<nav :class="{'fixed-nav' : isFixed}">
+				<div id="topNav" class="swiper-container" @click="mySwiper">
+					<div class="swiper-wrapper">
+						<div v-for="item in nav" class="swiper-slide"
+							:class="[$index==clickIndex ? 'active' : '']"
+							@click="ckNav(item.id)">
+							<span>{{item.name}}</span>
+						</div>
+					</div>
+				</div>
+			</nav>
+		</div>
+
+		<div v-if="banner" class="banner" v-show="clickIndex==0">
+			<div id="nav" class="swiper-container">
+				<div class="swiper-wrapper">
+					<div v-for="item in banner" class="swiper-slide">
+						<img :src="item.imgSrc" alt="">
+					</div>
+				</div>
+				<!-- 如果需要分页器 -->
+				<div class="swiper-pagination"></div>
+			</div>
+		</div>
+
+		<div class="course">
+			<template v-if="courses.length">
+			<div class="c-item" v-for="course in courses">
 				<div class="cc-wrap" @click="enterDetail(course.id)">
 					<div class="c-top">
-						<a :href="'detail.htm?cid='+course.id" v-if="course.logo"><img :src="course.logo" alt=""></a>
-						<a :href="'detail.htm?cid='+course.id" v-else><img src="img/course.jpg" alt=""></a>
+						<a :href="'detail.htm?cid='+course.id" v-if="course.logo"><img
+							:src="course.logo" alt=""></a> <a
+							:href="'detail.htm?cid='+course.id" v-else><img
+							src="img/course.jpg" alt=""></a>
 						<!-- <span>热门</span> -->
 					</div>
 
 					<div class="c-bottom">
-						<div class="c-name"><a :href="'detail.htm?cid='+course.id">{{course.name}}</a> <!--<span>市场价 <del>${{course.price}}</del></span>--></div>
+						<div class="c-name">
+							<a :href="'detail.htm?cid='+course.id">{{course.name}}</a>
+							<!--<span>市场价 <del>${{course.price}}</del></span>-->
+						</div>
 						<div class="c-rule">
 							<h5>拼团规则：</h5>
-							<div class="rule-content" v-html="course.codex">
-							</div>
+							<div class="rule-content" v-html="course.codex"></div>
 						</div>
-<template v-if="course.state=='START'">
-  <div class="c-time">
-    <table cellspacing="0" width="125px" height="65px" style="border-radius: 0px 0px 6px 6px;border:1px solid #F00;">
-      <tr height="20px">
-        <td align="center" bgcolor="#F00"><font color="#FFF">距结束</font></td>
-        <td align="center" style="border-bottom:1px solid #F00;"><span>{{course.endDate | getGroupDay}}</span>天<span>{{course.endDate | getGroupHour}}</span>时<span>{{course.endDate | getGroupMinu}}</span>分</td>
-      </tr>
-      <tr>
-        <td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
-      </tr>
-    </table>
-  </div>
-</template>
-<template v-if="course.state=='WAIT'">
-  <div class="c-time">
-    <table cellspacing="0" width="125px" height="65px" style="border-radius: 0px 0px 6px 6px;border:1px solid #008000;">
-      <tr height="20px">
-        <td align="center" bgcolor="#008000"><font color="#FFF">距开团</font></td>
-        <td align="center" style="border-bottom:1px solid #008000;"><span>{{course.startDate | getGroupDay}}</span>天<span>{{course.startDate | getGroupHour}}</span>时<span>{{course.startDate | getGroupMinu}}</span>分</td>
-      </tr>
-      <tr>
-        <td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
-      </tr>
-    </table>
-  </div>
-</template>
-<template v-if="course.state=='END'">
-  <div class="c-time">
-    <table cellspacing="0" width="125px" height="65px" style="border-radius: 0px 0px 6px 6px;border:1px solid #999;">
-      <tr height="20px">
-        <td align="center" bgcolor="#999"><font color="#FFF">已结束</font></td>
-        <td align="center" style="border-bottom:1px solid #999;"><span>0</span>天<span>0</span>时<span>0</span>分</td>
-      </tr>
-      <tr>
-        <td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
-      </tr>
-    </table>
-  </div>
-</template>
+						<template v-if="course.state=='START'">
+						<div class="c-time">
+							<table cellspacing="0" width="125px" height="65px"
+								style="border-radius: 0px 0px 6px 6px; border: 1px solid #F00;">
+								<tr height="20px">
+									<td align="center" bgcolor="#F00"><font color="#FFF">距结束</font></td>
+									<td align="center" style="border-bottom: 1px solid #F00;"><span>{{course.endDate
+											| getGroupDay}}</span>天<span>{{course.endDate |
+											getGroupHour}}</span>时<span>{{course.endDate | getGroupMinu}}</span>分</td>
+								</tr>
+								<tr>
+									<td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
+								</tr>
+							</table>
+						</div>
+						</template>
+						<template v-if="course.state=='WAIT'">
+						<div class="c-time">
+							<table cellspacing="0" width="125px" height="65px"
+								style="border-radius: 0px 0px 6px 6px; border: 1px solid #008000;">
+								<tr height="20px">
+									<td align="center" bgcolor="#008000"><font color="#FFF">距开团</font></td>
+									<td align="center" style="border-bottom: 1px solid #008000;"><span>{{course.startDate
+											| getGroupDay}}</span>天<span>{{course.startDate |
+											getGroupHour}}</span>时<span>{{course.startDate |
+											getGroupMinu}}</span>分</td>
+								</tr>
+								<tr>
+									<td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
+								</tr>
+							</table>
+						</div>
+						</template>
+						<template v-if="course.state=='END'">
+						<div class="c-time">
+							<table cellspacing="0" width="125px" height="65px"
+								style="border-radius: 0px 0px 6px 6px; border: 1px solid #999;">
+								<tr height="20px">
+									<td align="center" bgcolor="#999"><font color="#FFF">已结束</font></td>
+									<td align="center" style="border-bottom: 1px solid #999;"><span>0</span>天<span>0</span>时<span>0</span>分</td>
+								</tr>
+								<tr>
+									<td colspan="2" align="center"><b><span>市场价 <del>${{course.price}}</del></span></b></td>
+								</tr>
+							</table>
+						</div>
+						</template>
 						<!--<div class="c-time">
 							<template v-if="course.state=='END' ">
 								<div class="c-t-t">该团已结束：</div>
@@ -123,32 +152,45 @@
 
 					<div class="progress-bar">
 						<div class="bg-bar"></div>
-						<div v-if="course.buyNumber" class="cur-bar" :style="{width:getBarPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}"></div>
+						<div v-if="course.buyNumber" class="cur-bar"
+							:style="{width:getBarPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}"></div>
 						<div class="start-num">
-							<span v-for="sub in course.subjectPriceDtolist" :style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">{{sub.startNum}}</span>
+							<span v-for="sub in course.subjectPriceDtolist"
+								:style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">{{sub.startNum}}</span>
 						</div>
 						<div class="zone-price">
-							<span v-for="sub in course.subjectPriceDtolist" :style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">${{sub.price}}</span>
+							<span v-for="sub in course.subjectPriceDtolist"
+								:style="{left:getPercent(sub.startNum,course.subjectPriceDtolist)+'%'}">${{sub.price}}</span>
 						</div>
-						<div v-if="course.buyNumber" class="have-nums" :style="{left:getPersonPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}">已团 <span>{{course.buyNumber}}</span> 人</div>
-						<div class="nums" v-else>已团 <span>0</span> 人</div>
+						<div v-if="course.buyNumber" class="have-nums"
+							:style="{left:getPersonPercent(course.buyNumber,course.subjectPriceDtolist)+'%'}">
+							已团 <span>{{course.buyNumber}}</span> 人
+						</div>
+						<div class="nums" v-else>
+							已团 <span>0</span> 人
+						</div>
 					</div>
 				</div>
 
 				<div class="c-btn c-start clearfix" v-if="course.state=='START'">
-                                        <div class="c-share" v-show="course.type!='DEFAULT'" @click="share(course.name, 'detail.htm?cid='+course.id)">二维码分享</div>
-					<div class="c-pay" v-show="course.type=='INDIE'" @click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
-					<div class="c-pay" v-show="course.type=='CHILD'" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
-					<div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+					<div class="c-share" v-show="course.type!='DEFAULT'"
+						@click="share(course.name, 'detail.htm?cid='+course.id)">二维码分享</div>
+					<div class="c-pay" v-show="course.type=='INDIE'"
+						@click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
+					<div class="c-pay" v-show="course.type=='CHILD'"
+						@click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
+					<div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'"
+						@click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
 				</div>
 				<!-- <div class="c-btn c-start clearfix" v-if="course.state=='START'">
 					<div class="c-pay c-my-pay" @click="goPay(course.id)">参团预付款 ${{course.preAmount}}</div>
 				</div> -->
 				<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
 					<!-- <div class="c-share">邀请好友参团</div> -->
-                                        <div class="c-share" v-show="course.type!='DEFAULT'" @click="share(course.name, 'detail.htm?cid='+course.id)">二维码分享</div>
+					<div class="c-share" v-show="course.type!='DEFAULT'"
+						@click="share(course.name, 'detail.htm?cid='+course.id)">二维码分享</div>
 					<div class="c-pay" v-show="course.type!='DEFAULT'">待开团</div>
-                                        <div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'">待开团</div>
+					<div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'">待开团</div>
 				</div>
 				<div class="c-btn c-end" v-if="course.state=='END'">
 					<div class="c-over">该团已结束</div>
@@ -161,64 +203,71 @@
 				</div>
 
 			</div>
-		</template>
-		<div class="no-data no-course" v-else>该类目下暂无课程</div>
+			</template>
+			<div class="no-data no-course" v-else>该类目下暂无课程</div>
+		</div>
+
+		<footer>
+			<div class="f-title">咨询客服</div>
+			<div class="f-tel">
+				<p>
+					澳洲总部： <a href="tel:+61 292831227">+61 292831227</a>
+				</p>
+				<p>
+					中国总部：<a href="tel:010-82887260">（010）82887260</a>
+				</p>
+			</div>
+		</footer>
+
+		<!-- 侧边栏 -->
+		<div class="index-wrap" v-show="wrap" @click="hideMy"></div>
+		<div class="index-aside" :class="classObj">
+			<div class="index-face" @click="update">
+				<img :src="userMsg.logo" alt=""> <span>{{userMsg.nickname}}</span>
+				<i class="iconfont">&#xe6a3;</i>
+			</div>
+			<div class="personal-center">
+				<ul>
+					<li><a href="order.htm"><i class="iconfont">&#xe699;</i><span>我的订单</span></a></li>
+					<li><a href="recommend.htm"><i class="iconfont">&#xe6e1;</i><span>我的推荐</span></a></li>
+					<li><a href="adviser.htm"><i class="iconfont">&#xe6cb;</i><span>我的顾问</span></a></li>
+					<li><a href="set.htm"><i class="iconfont">&#xe68a;</i><span>设置</span></a></li>
+				</ul>
+			</div>
+		</div>
+
+		<!-- loading -->
+		<div v-if="loading" class="s-wrap fixed">
+			<div class="spinner">
+				<div class="rect1"></div>
+				<div class="rect2"></div>
+				<div class="rect3"></div>
+				<div class="rect4"></div>
+				<div class="rect5"></div>
+			</div>
+		</div>
+
+		<div class="back-home">
+			<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
+		</div>
+
+		<div class="chat-kefu" @click="showKefu">
+			<i class="iconfont">&#xe6ff;</i>顾问
+		</div>
+		<div class="chat-wrap" v-show="isShowKefu">
+			<div class="close-kefu" @click="closeKefu">
+				<i class="iconfont">&#xe658;</i>
+			</div>
+			<div class="kf-img">
+				<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl"
+					alt=""> <img v-else src="img/kefu.jpg" alt="">
+				<p>长按图片识别二维码 即时对话</p>
+			</div>
+		</div>
+
 	</div>
 
-	<footer>
-		<div class="f-title">咨询客服</div>
-		<div class="f-tel">
-			<p>澳洲总部：  <a href="tel:+61 292831227">+61 292831227</a></p>
-			<p>中国总部：<a href="tel:010-82887260">（010）82887260</a></p>
-		</div>
-	</footer>
 
-	<!-- 侧边栏 -->
-	<div class="index-wrap" v-show="wrap" @click="hideMy"></div>
-	<div class="index-aside" :class="classObj">
-		<div class="index-face" @click="update">
-			<img :src="userMsg.logo" alt="">
-			<span>{{userMsg.nickname}}</span>
-			<i class="iconfont">&#xe6a3;</i>
-		</div>
-		<div class="personal-center">
-			<ul>
-				<li><a href="order.htm"><i class="iconfont">&#xe699;</i><span>我的订单</span></a></li>
-				<li><a href="recommend.htm"><i class="iconfont">&#xe6e1;</i><span>我的推荐</span></a></li>
-				<li><a href="adviser.htm"><i class="iconfont">&#xe6cb;</i><span>我的顾问</span></a></li>
-				<li><a href="set.htm"><i class="iconfont">&#xe68a;</i><span>设置</span></a></li>
-			</ul>
-		</div>
-	</div>
-
-	<!-- loading -->
-	<div v-if="loading" class="s-wrap fixed">
-		<div class="spinner">
-		  <div class="rect1"></div>
-		  <div class="rect2"></div>
-		  <div class="rect3"></div>
-		  <div class="rect4"></div>
-		  <div class="rect5"></div>
-		</div>
-	</div>
-
-	<div class="back-home">
-		<a href="list.htm"><i class="iconfont">&#xe6b8;</i>首页</a>
-	</div>
-
-	<div class="chat-kefu" @click="showKefu"><i class="iconfont">&#xe6ff;</i>顾问</div>
-	<div class="chat-wrap" v-show="isShowKefu">
-		<div class="close-kefu" @click="closeKefu"><i class="iconfont">&#xe658;</i></div>
-		<div class="kf-img">
-			<img v-if="userMsg.adviserDto" :src="userMsg.adviserDto.imageUrl" alt="">
-			<img v-else src="img/kefu.jpg" alt="">
-			<p>长按图片识别二维码 即时对话</p>
-		</div>
-	</div>
-
-</div>
-
-	
 	<script src="js/group.js?verson=20171026"></script>
 	<script src="js/vue.min.js"></script>
 	<script src="js/axios.min.js"></script>
@@ -486,7 +535,9 @@
 					location.href="detail.htm?cid="+id;
 				},
 				share:function(name, url){
-					var url = httpsUrl + url;
+					//var url = httpsUrl + url;
+					var that = this;
+					var url = httpsUrl + url + '&popenId='+that.userInfo.authOpenId+'&regionId='+that.cityID+'&cityName='+encodeURIComponent(that.cityName);
 					document.getElementById('share').style.display = '';
 					document.getElementById('share-text').style.display = '';
 					document.getElementById('app').style.display = 'none';
