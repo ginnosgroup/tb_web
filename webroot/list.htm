@@ -174,7 +174,7 @@
 
 				<div class="c-btn c-start clearfix" v-if="course.state=='START'">
 					<div class="c-share" v-show="course.type!='DEFAULT'"
-						@click="share(course.name, 'detail.htm?cid='+course.id)">二维码分享</div>
+						@click="share(course.name, course.id)">二维码分享</div>
 					<div class="c-pay" v-show="course.type=='INDIE'"
 						@click="goPay(course.id)">发起拼团 (预付款: ${{course.preAmount}})</div>
 					<div class="c-pay" v-show="course.type=='CHILD'"
@@ -188,7 +188,7 @@
 				<div class="c-btn c-wait clearfix" v-if="course.state=='WAIT'">
 					<!-- <div class="c-share">邀请好友参团</div> -->
 					<div class="c-share" v-show="course.type!='DEFAULT'"
-						@click="share(course.name, 'detail.htm?cid='+course.id)">二维码分享</div>
+						@click="share(course.name, course.id)">二维码分享</div>
 					<div class="c-pay" v-show="course.type!='DEFAULT'">待开团</div>
 					<div class="c-pay c-my-pay" v-show="course.type=='DEFAULT'">待开团</div>
 				</div>
@@ -534,10 +534,9 @@
 				enterDetail:function(id){
 					location.href="detail.htm?cid="+id;
 				},
-				share:function(name, url){
+				share:function(name, courseId)){
 					//var url = httpsUrl + url;
-					var that = this;
-					var url = httpsUrl + url + '&popenId='+that.userInfo.authOpenId+'&regionId='+that.cityID+'&cityName='+encodeURIComponent(that.cityName);
+					var url = httpsUrl + 'detail.htm?regionId=' + cid + '&popenId='+openId+'&cid='+courseId+'&cityName='+encodeURIComponent(cName);
 					document.getElementById('share').style.display = '';
 					document.getElementById('share-text').style.display = '';
 					document.getElementById('app').style.display = 'none';
