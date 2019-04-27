@@ -1,6 +1,5 @@
 package au.com.zhinanzhen.tb.service.pojo;
 
-
 import java.util.Date;
 
 import au.com.zhinanzhen.tb.dao.pojo.UserDO;
@@ -9,37 +8,41 @@ import lombok.Data;
 @Data
 public class UserDTO {
 
-    private int id;
+	private int id;
 
-    private String name;
-    
-    private Date birthday;
+	private String name;
 
-    private String phone;
+	private String familyName;
 
-    private String email;
+	private String givenName;
 
-    private String authType;
+	private Date birthday;
 
-    private String authOpenId;
+	private String phone;
 
-    private String username;
+	private String email;
 
-    private String nickname;
-    
-    private String logo;
+	private String authType;
 
-    private double balance;
+	private String authOpenId;
 
-    private int regionId;
-    
-    private Integer adviserId;
-    
-    private String recommendOpenid;
-    
-    private AdviserDTO adviserDto;
-    
-    private UserDO recommendUserDO;
-    
-    private Date createDate;
+	private String username;
+
+	private String nickname;
+
+	private String logo;
+
+	private double balance;
+
+	private int regionId;
+
+	private Integer adviserId;
+
+	private String recommendOpenid;
+
+	private AdviserDTO adviserDto;
+
+	private UserDO recommendUserDO;
+
+	private Date createDate;
 }

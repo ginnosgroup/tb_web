@@ -6,6 +6,8 @@
 		gmt_create,
 		gmt_modify,
 		name,
+		family_name,
+		given_name,
 		birthday,
 		phone,
 		email,
@@ -20,9 +22,11 @@
 		values (
 		now(),
 		now(),
-		"",
-		null,
-		"",
+		#{name},
+		#{familyName},
+		#{givenName},
+		now(),
+		#{phone},
 		"",
 		#{thirdType},
 		#{thirdId},
@@ -38,6 +42,8 @@
 		select
 		id,
 		name,
+		family_name as familyName,
+		given_name as givenName,
 		birthday,
 		phone,
 		email,
@@ -66,6 +72,8 @@
 		set gmt_modify =
 		now(),
 		name = #{name},
+		family_name = #{familyName},
+		given_name = #{givenName},
 		balance =#{balance},
 		phone = #{phone},
 		email =
@@ -83,6 +91,8 @@
 		select
 		id,
 		name,
+		family_name as familyName,
+		given_name as givenName,
 		birthday,
 		phone,
 		email,
@@ -104,6 +114,8 @@
 		select
 		id,
 		name,
+		family_name as familyName,
+		given_name as givenName,
 		birthday,
 		phone,
 		email,
