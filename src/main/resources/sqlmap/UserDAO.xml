@@ -34,7 +34,7 @@
 		"",
 		#{nickname},
 		#{logo},
-		#{thirdId},
+		"",
 		#{balance},
 		0,
 		#{recommendOpenid})
