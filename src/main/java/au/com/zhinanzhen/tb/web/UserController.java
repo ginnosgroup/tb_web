@@ -243,19 +243,16 @@ public class UserController extends AbstractController {
 			HttpSession session = req.getSession();
 			if (session == null)
 				return new Response<Boolean>(1, "验证超时，请重新验证 ", Boolean.FALSE);
-			String verStrCode = (String) session.getAttribute("identifyingCode");
-			String verPhone = (String) session.getAttribute("verPhone");
-			String verTime = (String) session.getAttribute("verTime");
-			String systemDate = CommonUtil.getSystemTime();
-			if (verTime == null || CommonUtil.getTimeDifference(systemDate, verTime) >= 600)
-				return new Response<Boolean>(1, "验证超时,请在10分钟内完成验证", Boolean.FALSE);
-			if (!verificationCode.equals(verStrCode))
-				return new Response<Boolean>(1, "验证码错误", Boolean.FALSE);
-			if (!phone.equals(verPhone))
-				return new Response<Boolean>(1, "验证的手机号不匹配", Boolean.FALSE);
-//			return new Response<Boolean>(0, userService.addUser(name, familyName, givenName,
-//					ThirdTypeEnum.WECHAT.toString(), phone, wechatId, wechatId, null, null));
-			
+//			String verStrCode = (String) session.getAttribute("identifyingCode");
+//			String verPhone = (String) session.getAttribute("verPhone");
+//			String verTime = (String) session.getAttribute("verTime");
+//			String systemDate = CommonUtil.getSystemTime();
+//			if (verTime == null || CommonUtil.getTimeDifference(systemDate, verTime) >= 600)
+//				return new Response<Boolean>(1, "验证超时,请在10分钟内完成验证", Boolean.FALSE);
+//			if (!verificationCode.equals(verStrCode))
+//				return new Response<Boolean>(1, "验证码错误", Boolean.FALSE);
+//			if (!phone.equals(verPhone))
+//				return new Response<Boolean>(1, "验证的手机号不匹配", Boolean.FALSE);
 			int userId = getUserIdByOpenId(ThirdTypeEnum.WECHAT.toString(), wehatOpenId);
 			UserDTO userDto = userService.getUserDTOById(userId);
 			userDto.setName(name);
