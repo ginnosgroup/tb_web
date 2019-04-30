@@ -200,6 +200,12 @@ public class UserServiceImpl extends BaseService implements UserService {
 			se.setCode(ErrorCodeEnum.OTHER_ERROR.code());
 			throw se;
 		}
+		if (StringUtil.isNotEmpty(userDo.getNickname()))
+			try {
+				userDo.setNickname(new String(Base64Util.encodeBase64(userDo.getNickname().getBytes())));
+			} catch (Exception e) {
+				System.out.println(("昵称转码失败"));
+			}
 		if (!userDAO.update(userDo)) {
 			ServiceException se = new ServiceException("update user fail !");
 			se.setCode(ErrorCodeEnum.EXECUTE_ERROR.code());
