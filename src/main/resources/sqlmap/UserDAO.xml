@@ -30,7 +30,7 @@
 		#{phone},
 		"",
 		#{thirdType},
-		#{nickname},
+		#{thirdId},
 		"",
 		#{nickname},
 		#{logo},
