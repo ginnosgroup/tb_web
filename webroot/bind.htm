@@ -22,20 +22,27 @@
 				</div>
 			</div> -->
 			
-			<div class="f-i-input">
+			<div class="f-i-input" style="margin-top:20%;">
 				<div class="f-input">
-					<input type="text" v-model="wechatNumber" placeholder="请输入微信号">
+					<input type="text" v-model="familyName" placeholder="Family Name (姓拼音)" style="width:48%;display:inline;">
+					<input type="text" v-model="givenName" placeholder="Given Name (名字拼音)" style="margin-left:5px;width:49%;display:inline;">
 				</div>
 				<div class="f-input">
-					<input type="tel" v-model="phoneNumber" placeholder="请输入电话号码">
+					<input type="text" v-model="name" placeholder="English Name (英文名)">
+				</div>				
+				<div class="f-input">
+					<input type="text" v-model="wechatId" placeholder="WeChatID (微信号)">
 				</div>
 				<div class="f-input">
-					<input type="number" v-model="smsCode" placeholder="请输入短信验证码">
+					<input type="tel" v-model="phoneNumber" placeholder="Phone Number (手机号码)">
+				</div>
+				<div class="f-input">
+					<input type="number" v-model="smsCode" placeholder="Verification Code (验证码)">
 					<button v-if="sms"  class="get-sms get-sms2">{{timer}}s</button>
-					<button v-else class="get-sms" @click="getSms">获取验证码</button>
+					<button v-else class="get-sms" @click="getSms" style="height:100%;padding: .09rem 0;">Get Code<br/>获取验证码</button>
 				</div>
-				<div v-if="isGet" class="get-now" @click="getNow">立即领取</div>
-				<div v-else class="get-now">领取中...</div>
+				<div v-if="isGet" class="get-now" @click="getNow">Register (注册)</div>
+				<div v-else class="get-now">注册中...</div>
 			</div>
 		</div>
 	</div>
@@ -56,6 +63,7 @@
 	<script src="js/group.js?verson=20171026"></script>
 	<script src="js/vue.min.js"></script>
 	<script src="js/axios.min.js"></script>
+	<script src="js/jquery.min.js"></script>
 	<script>
 		haha.init(); //初始化字体大小
 		var openId = haha.getQuery('openId');
@@ -74,14 +82,18 @@
 				popenId:popenId,
 				sms:false,
 				timer:59,
-				wechatNumber:'',
+				familyName:'',
+				givenName:'',
+				name:'',
+				wechatId:'',
 				phoneNumber:'',
-				smsCode:'',
+				smsCode:'',				
 				saveSms:'',
 				isGet:true,
 				loading:true			
 			},
 			created:function(){
+				//this.loading=false;
 				this.getUserInfo();
 			},
 			methods:{
@@ -175,15 +187,44 @@
 					}
 					that.isGet=false;
 					//提交
-					axios.get(serveUrl+'/user/regist',{
-						params:{
-							phone:that.phoneNumber,
-							username:that.wechatNumber,
-							openId:that.openId,
-							thirdType:"WECHAT",
-							identifyingCode:that.smsCode
-						}
-					}).then(function(response){
+					$.post(serveUrl+'/user/addWechatUser',{familyName:that.familyName,givenName:that.givenName,name:that.name,wechatId:that.wechatId,phone:that.phoneNumber,verificationCode:that.smsCode},
+			   	function(data){
+			   			if (data.code == 0)
+			   			{
+			   					//调个人信息接口
+									axios.get(serveUrl+'/user/getUser',{
+										params:{
+											openId:that.openId,
+											thirdType:"WECHAT"
+										}
+									}).then(function(response){
+										var res = response.data.data;
+										console.log(res);
+										sessionStorage.setItem("userInfo",JSON.stringify(res));
+										//that.isGet=true;
+										location.href="choose-adviser.htm";
+		
+									}).catch(function(error){
+										alert(error);
+									})
+			   			}else
+			   			{
+			   					alert(response.data.message);
+									return false;
+			   			}
+			   			//console.log(data);
+			   	});
+			   	return false;
+					let data = new FormData();
+					data.append('familyName',that.familyName);
+					data.append('givenName',that.givenName);
+					data.append('name',that.name);
+					data.append('wechatId',that.wechatId);
+					data.append('phone',that.phoneNumber);
+					data.append('verificationCode',that.smsCode);
+					axios.defaults.headers.post['Content-Type'] = 'text/plain;charset=UTF-8'; 
+					axios.post(serveUrl+'/user/addWechatUser',data
+					).then(function(response){
 						if(!response.data.state){
 							//调个人信息接口
 							axios.get(serveUrl+'/user/getUser',{
