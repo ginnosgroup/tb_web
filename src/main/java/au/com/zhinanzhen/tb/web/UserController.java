@@ -234,6 +234,7 @@ public class UserController extends AbstractController {
 	public Response<Boolean> addWechatUser(@RequestParam(value = "familyName", required = false) String familyName,
 			@RequestParam(value = "givenName", required = false) String givenName,
 			@RequestParam(value = "name", required = false) String name,
+			@RequestParam(value = "wehatOpenId") String wehatOpenId,
 			@RequestParam(value = "wechatId") String wechatId, @RequestParam(value = "phone") String phone,
 			@RequestParam(value = "verificationCode") String verificationCode, HttpServletRequest req) {
 		try {
@@ -252,8 +253,17 @@ public class UserController extends AbstractController {
 				return new Response<Boolean>(1, "验证码错误", Boolean.FALSE);
 			if (!phone.equals(verPhone))
 				return new Response<Boolean>(1, "验证的手机号不匹配", Boolean.FALSE);
-			return new Response<Boolean>(0, userService.addUser(name, familyName, givenName,
-					ThirdTypeEnum.WECHAT.toString(), phone, wechatId, wechatId, null, null));
+//			return new Response<Boolean>(0, userService.addUser(name, familyName, givenName,
+//					ThirdTypeEnum.WECHAT.toString(), phone, wechatId, wechatId, null, null));
+			
+			int userId = getUserIdByOpenId(ThirdTypeEnum.WECHAT.toString(), wehatOpenId);
+			UserDTO userDto = userService.getUserDTOById(userId);
+			userDto.setName(name);
+			userDto.setFamilyName(familyName);
+			userDto.setGivenName(givenName);
+			userDto.setPhone(phone);
+			userDto.setWechatUsername(wechatId);
+			return new Response<Boolean>(0, userService.updateUser(userDto));
 		} catch (Exception e) {
 			return new Response<Boolean>(1, e.getMessage(), Boolean.FALSE);
 		}
