@@ -21,11 +21,15 @@
 			created:function(){
 				//是否是APP
 				var isApp = Boolean(haha.getQuery('isApp'));
+				var isYongjinbiao = (document.domain == 'yongjinbiao.zhinanzhen.org');
+				alert(document.domain);
 				if(isApp){
 					sessionStorage.setItem("isApp",'yes');
 					window.webkit.messageHandlers.AppLogin.postMessage({
 						code: 1, msg: 'APP登录'
 					})
+				}else if(isYongjinbiao){
+					window.location.href="/admin/login.htm";
 				}else{
 					this.login();
 				}
