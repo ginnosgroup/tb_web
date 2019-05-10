@@ -187,7 +187,7 @@
 					}
 					that.isGet=false;
 					//提交
-					$.post(serveUrl+'/user/addWechatUser',{familyName:that.familyName,givenName:that.givenName,name:that.name,wechatId:that.wechatId,phone:that.phoneNumber,verificationCode:that.smsCode},
+					$.post(serveUrl+'/user/addWechatUser',{familyName:that.familyName,givenName:that.givenName,name:that.name,wechatId:that.wechatId,phone:that.phoneNumber,verificationCode:that.smsCode,wechatOpenId:that.openId},
 			   	function(data){
 			   			if (data.code == 0)
 			   			{
