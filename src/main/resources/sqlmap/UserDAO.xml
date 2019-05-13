@@ -85,6 +85,7 @@
 		auth_nickname = #{nickname},
 		auth_logo = #{logo},
 		wechat_username = #{wechatUsername},
+		source = #{source},
 		region_id =
 		#{regionId},
 		adviser_id = #{adviserId}

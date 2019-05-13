@@ -236,6 +236,7 @@ public class UserController extends AbstractController {
 			@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "wechatOpenId") String wechatOpenId,
 			@RequestParam(value = "wechatId") String wechatId, @RequestParam(value = "phone") String phone,
+			@RequestParam(value = "source", required = false) String source,
 			@RequestParam(value = "verificationCode") String verificationCode, HttpServletRequest req) {
 		try {
 			if (userService.isPhoneExitst(phone))
@@ -259,6 +260,7 @@ public class UserController extends AbstractController {
 			userDto.setFamilyName(familyName);
 			userDto.setGivenName(givenName);
 			userDto.setPhone(phone);
+			userDto.setSource(source);
 			userDto.setWechatUsername(wechatId);
 			return new Response<Boolean>(0, userService.updateUser(userDto));
 		} catch (Exception e) {

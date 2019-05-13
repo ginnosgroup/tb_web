@@ -30,6 +30,8 @@ public class UserDO {
 	private String nickname;
 	
 	private String wechatUsername;
+	
+	private String source;
 
 	private String logo;
 
