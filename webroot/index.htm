@@ -21,8 +21,7 @@
 			created:function(){
 				//是否是APP
 				var isApp = Boolean(haha.getQuery('isApp'));
-				var isYongjinbiao = (document.domain == 'yongjinbiao.zhinanzhen.org');
-				alert(document.domain);
+				var isYongjinbiao = (document.domain == 'yongjinbiao.zhinanzhen.org' || document.domain == 'yongjinbiao.51mantuo.com');
 				if(isApp){
 					sessionStorage.setItem("isApp",'yes');
 					window.webkit.messageHandlers.AppLogin.postMessage({
