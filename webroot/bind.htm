@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-cn">
 <head>
 	<meta charset="UTF-8">
@@ -22,7 +22,7 @@
 				</div>
 			</div> -->
 			
-			<div class="f-i-input" style="margin-top:20%;">
+			<div class="f-i-input" style="margin-top:10%;">
 				<div class="f-input">
 					<input type="text" v-model="familyName" placeholder="Family Name (姓拼音)" style="width:48%;display:inline;font-size: 0.24rem;">
 					<input type="text" v-model="givenName" placeholder="Given Name (名字拼音)" style="margin-left:5px;width:49%;display:inline;font-size: 0.24rem;">
@@ -37,14 +37,13 @@
 					<input type="tel" v-model="phoneNumber" placeholder="Phone Number (手机号码)" style="font-size: 0.24rem;">
 				</div>
 				<div class="f-select">
-					<select class="form-control" style="position:relative;font-size: 0.24rem;border-radius:.1rem;display:block;padding:.25rem .15rem;width:100%;margin-top:.3rem;border:0;background-color:#fff;color:#666;box-sizing:border-box;" id="source" name="source">
-					<option value=''>获知来源</option>
-					<option value='推荐'>推荐</option>
-					<option value='文章'>文章</option>
-					<option value='公众号'>公众号</option>
-					<option value='网络搜索'>网络搜索</option>
-					<option value='传单'>传单</option>
-					<option value='其他'>其他</option>
+					<select v-model="source_area" class="form-control" style="position:relative;font-size: 0.24rem;border-radius:.1rem;display:block;padding:.25rem .15rem;width:100%;margin-top:.3rem;border:0;background-color:rgb(68,139,0);color:#FFF;box-sizing:border-box;" id="area" name="area">
+					<option value=''>Your Area? (您所在地区)</option>					
+					</select>
+				</div>
+				<div class="f-select">
+					<select v-model="source" class="form-control" style="position:relative;font-size: 0.24rem;border-radius:.1rem;display:block;padding:.25rem .15rem;width:100%;margin-top:.3rem;border:0;background-color:#fff;color:#666;box-sizing:border-box;" id="source" name="source">
+					<option value=''>How did you hear about us? (获知来源)</option>					
 					</select>
 				</div>
 				<div class="f-input">
@@ -79,12 +78,12 @@
 		haha.init(); //初始化字体大小
 		var openId = haha.getQuery('openId');
 		var popenId = sessionStorage.getItem('popenId');
-
+		
 		if(openId){
 			sessionStorage.setItem("openId",openId);
 		}else{
 			openId = sessionStorage.getItem("openId");
-		}
+		}	
 
 		var v = new Vue({
 			el:'#app',
@@ -98,6 +97,7 @@
 				name:'',
 				wechatId:'',
 				phoneNumber:'',
+				source:'',
 				smsCode:'',				
 				saveSms:'',
 				isGet:true,
@@ -106,6 +106,35 @@
 			created:function(){
 				//this.loading=false;
 				this.getUserInfo();
+				//绑定地区
+				var source_area = $("#area");		    
+		    $.ajax({
+	          url: '/admin/source/listSourceRegion',
+	          type: 'GET',
+	          dataType: 'json'
+        }).done(function(response) {
+	        	response = response.data;
+	        	for (var item in response)
+	        	{
+	        			source_area.append("<option value='"+response[item].id+"'>"+response[item].name+"</option>");
+	        	}
+        });
+        source_area.change(function(){
+        		//清空下拉        		
+	        	var obj_source = $("#source");		    
+	        	obj_source.empty();
+				    $.ajax({
+		          url: '/admin/source/list?sourceRegionId='+this.value,
+		          type: 'GET',
+		          dataType: 'json'
+		        }).done(function(response) {
+		        	response = response.data;
+		        	for (var item in response)
+		        	{
+		        			obj_source.append("<option value='"+response[item].name+"'>"+response[item].name+"</option>");
+		        	}
+		        });
+        });
 			},
 			methods:{
 				getUserInfo:function(){
@@ -188,6 +217,10 @@
 				},
 				getNow:function(){
 					var that = this;
+					if(!that.source_area){
+						alert("请选择地区");
+						return;
+					}
 					if(!that.phoneNumber){
 						alert("请输入电话号码");
 						return;
@@ -198,7 +231,7 @@
 					}
 					that.isGet=false;
 					//提交
-					$.post(serveUrl+'/user/addWechatUser',{familyName:that.familyName,givenName:that.givenName,name:that.name,wechatId:that.wechatId,phone:that.phoneNumber,verificationCode:that.smsCode,source:that.source},
+					$.post(serveUrl+'/user/addWechatUser',{familyName:that.familyName,givenName:that.givenName,name:that.name,wechatId:that.wechatId,phone:that.phoneNumber,verificationCode:that.smsCode,source:that.source,wechatOpenId:that.openId},
 			   	function(data){
 			   			if (data.code == 0)
 			   			{
@@ -220,47 +253,12 @@
 									})
 			   			}else
 			   			{
-			   					alert(response.data.message);
+			   					alert(data.message);
 									return false;
 			   			}
 			   			//console.log(data);
 			   	});
-			   	return false;
-					let data = new FormData();
-					data.append('familyName',that.familyName);
-					data.append('givenName',that.givenName);
-					data.append('name',that.name);
-					data.append('wechatId',that.wechatId);
-					data.append('phone',that.phoneNumber);
-					data.append('verificationCode',that.smsCode);
-					axios.defaults.headers.post['Content-Type'] = 'text/plain;charset=UTF-8'; 
-					axios.post(serveUrl+'/user/addWechatUser',data
-					).then(function(response){
-						if(!response.data.state){
-							//调个人信息接口
-							axios.get(serveUrl+'/user/getUser',{
-								params:{
-									openId:that.openId,
-									thirdType:"WECHAT"
-								}
-							}).then(function(response){
-								var res = response.data.data;
-								console.log(res);
-								sessionStorage.setItem("userInfo",JSON.stringify(res));
-								//that.isGet=true;
-								location.href="choose-adviser.htm";
-
-							}).catch(function(error){
-								alert(error);
-							})
-							
-						}else{
-							alert(response.data.message);
-							return false;
-						}
-					}).catch(function(error){
-						alert(error);
-					})	
+			   	return false;						
 				}
 			}
 		})
