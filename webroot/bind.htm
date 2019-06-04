@@ -217,6 +217,11 @@
 				},
 				getNow:function(){
 					var that = this;
+					if(/^\s+$/gi.test(that.name))
+					{
+						alert("请输入英文名");
+						return;
+					}
 					if(!that.source_area){
 						alert("请选择地区");
 						return;
